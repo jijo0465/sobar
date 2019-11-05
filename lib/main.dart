@@ -12,6 +12,7 @@ import 'package:kudians/user_cache.dart';
 import 'bar_map.dart';
 import 'calender_page.dart';
 import 'package:kudians/users.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 void main() => runApp(MyApp());
 
@@ -39,6 +40,7 @@ class _MyHomePageState extends State<MyHomePage> {
   SobarUsers sobarUser;
   int bottomNavSelected=0;
   bool holiday=true;
+  final FirebaseMessaging _messaging = FirebaseMessaging();
   static const List<Widget> _bottom_nav_options = <Widget>[
     BarMap(),
     PriceList(),
@@ -57,6 +59,30 @@ class _MyHomePageState extends State<MyHomePage> {
     if(!HolidaysCache().isCached()){
       setHolidays();
     }
+    _messaging.requestNotificationPermissions(
+      const IosNotificationSettings(
+        sound: true,
+        badge: true,
+        alert: true
+      )
+    );
+    _messaging.configure(
+      onMessage: (Map<String,dynamic> message)async{
+        print("onMessage: $message");
+      },
+      onLaunch: (Map<String,dynamic> message)async{
+        print("onLaunch: $message");
+      },
+      onResume: (Map<String,dynamic> message)async{
+        print("onResume: $message");
+      },
+      
+    );
+    _messaging.subscribeToTopic('holiday');
+
+    _messaging.getToken().then((token){
+      print("Token:"+token);
+    });
     super.initState();
   }
   @override
