@@ -47,7 +47,7 @@ class CalendarPage extends StatefulWidget{
                 child: Calendar(_holidays),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(0, 0, 0, 30),
+                padding: const EdgeInsets.fromLTRB(0, 0, 0, 65),
                 child: SizedBox(
                   height: 110,
                   child: SobarHolidayList(holidays: holidays,numOfHolidays: _numOfHolidays,),

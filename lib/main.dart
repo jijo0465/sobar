@@ -1,5 +1,6 @@
 import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kudians/firebase_services.dart';
 import 'package:kudians/holidays.dart';
@@ -68,26 +69,23 @@ class _MyHomePageState extends State<MyHomePage> {
     );
     _messaging.configure(
       onMessage: (Map<String,dynamic> message)async{
-        print("onMessage: $message");
+        Scaffold.of(context).showSnackBar(messageSnackBar(message));
       },
       onLaunch: (Map<String,dynamic> message)async{
-        print("onLaunch: $message");
+        Scaffold.of(context).showSnackBar(messageSnackBar(message));
       },
       onResume: (Map<String,dynamic> message)async{
-        print("onResume: $message");
+        Scaffold.of(context).showSnackBar(messageSnackBar(message));
       },
       
     );
     _messaging.subscribeToTopic('holiday');
-
-    _messaging.getToken().then((token){
-      print("Token:"+token);
-    });
     super.initState();
   }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Container(
         decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -106,65 +104,21 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
         child: Stack(children: <Widget>[
           Center(child: _bottom_nav_options.elementAt(bottomNavSelected)),
-          Container(
-            
-            height:300,
-            width: 100,
-            margin: EdgeInsets.fromLTRB(12, 45, 0, 0),
-            alignment: Alignment.topLeft,
-            child: Image.asset("assets/sobar_logo.png")
-          )
+          bottomNavigationar()
+          // Container(
+          //   height:300,
+          //   width: 100,
+          //   margin: EdgeInsets.fromLTRB(12, 45, 0, 0),
+          //   alignment: Alignment.topLeft,
+          //   child: Image.asset("assets/sobar_logo.png")
+          // )
         ],),
       ),
-      
-      bottomNavigationBar: _bottomNavigationBar()
+      // bottomNavigationBar: 
         );
       }
 
-  Widget _bottomNavigationBar(){
-    return Container(
-      child: BottomNavyBar(
-        showElevation: true,
-        iconSize: 20,
-        selectedIndex: bottomNavSelected,
-        backgroundColor: Colors.black,
-        onItemSelected: (index){
-          if(index!=0){
-            BarMap.closeBottomSheet();
-          }
-          
-          setState(() {
-          bottomNavSelected=index;
-          });
-        },
-   items: [
-       BottomNavyBarItem(
-         icon: Icon(Icons.map,),
-         title: Text('Map'),
-         activeColor: Colors.orange[900],
-         inactiveColor: Colors.orange
-       ),
-       BottomNavyBarItem(
-           icon: Icon(Icons.show_chart),
-           title: Text('Price'),
-           activeColor: Colors.orange[900],
-           inactiveColor: Colors.orange
-       ),
-       BottomNavyBarItem(
-           icon: Icon(Icons.calendar_today),
-           title: Text('Holidays'),
-           activeColor: Colors.orange[900],
-           inactiveColor: Colors.orange
-       ),
-       BottomNavyBarItem(
-           icon: Icon(Icons.supervised_user_circle),
-           title: Text('Profile'),
-           activeColor: Colors.orange[900],
-           inactiveColor: Colors.orange
-       )
-   ],),
-    );
-  }
+  
   void setUser(){
     FirebaseUser user;
     FirebaseAuth.instance.currentUser().then((value){
@@ -201,5 +155,62 @@ class _MyHomePageState extends State<MyHomePage> {
     HolidaysCache().setHolidays(holidays);
     HolidaysCache().setHolidates(holidates);
     HolidaysCache().setNumOfHolidays();
+  }
+  Widget messageSnackBar(message){
+    return SnackBar(
+      content: Container(
+        child: Row(
+          children: <Widget>[
+            Text("Tomorrow will be a bar Holiday!!",style: TextStyle(fontSize: 14),),
+            Text(message.notification['title'],style: TextStyle(fontSize: 8))
+          ],
+        )),
+      elevation: 9,
+      
+    );
+  }
+
+  Widget bottomNavigationar(){
+    return Container(
+              alignment: Alignment.bottomCenter,
+              padding: EdgeInsets.all(8),
+              child: ClipRRect(
+                borderRadius: BorderRadius.all(
+                    Radius.circular(10)
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                      child: CupertinoTabBar(
+                        iconSize: 26,
+                      items: [BottomNavigationBarItem(
+                    icon: Icon(Icons.map),
+                    title: Text("Map",style: TextStyle(letterSpacing: 1)),
+                    ),
+                    BottomNavigationBarItem( 
+                      icon: Icon(Icons.monetization_on),
+                      title: Text("Price",style: TextStyle(letterSpacing: 1))
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.calendar_today),
+                      title: Text("Holidays",style: TextStyle(letterSpacing: 1))
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.supervised_user_circle),
+                      title: Text("Profile",style: TextStyle(letterSpacing: 1),)
+                    )],
+                  backgroundColor: Colors.white10,
+                  activeColor: Colors.orange[800],
+                  inactiveColor: Colors.white,
+                  currentIndex: bottomNavSelected,
+                  onTap: ((index){
+                        if(index!=0){
+                          BarMap.closeBottomSheet();
+                        }
+                        setState(() {
+                          bottomNavSelected=index;
+                        });
+                  }),
+                ),
+              ),
+            );
   }
 }

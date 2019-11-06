@@ -1,8 +1,9 @@
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kudians/bottom_sheet_address_phone.dart';
 import 'package:kudians/bottom_sheet_header.dart';
-import 'package:kudians/filter_box.dart';
+import 'package:marquee/marquee.dart';
 import 'package:kudians/map_cache.dart';
 import 'package:kudians/place_data.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -161,8 +162,9 @@ class _BarMap extends State<BarMap>{
     }
     
     return Container(
-      
-      child: Stack(children: <Widget>[
+      child: Stack(
+        alignment: Alignment.center,
+        children: <Widget>[
         Container(
         height: MediaQuery.of(context).size.height,
         width: MediaQuery.of(context).size.width,
@@ -179,31 +181,73 @@ class _BarMap extends State<BarMap>{
               zoom: 8.0,
             ))),
               Positioned(
-              top: 0.85*MediaQuery.of(context).size.height,
-              left: 0.3*MediaQuery.of(context).size.width,
+              bottom: 0.15*MediaQuery.of(context).size.height,
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(6),
-                  color: Colors.deepOrange,
+                  color: Colors.white.withOpacity(0.08),
                 ),
                 alignment: Alignment.center,
-                width: 0.4*MediaQuery.of(context).size.width,
+                width: 0.72*MediaQuery.of(context).size.width,
                 height: 30,
-                child: filterChoice=="bevco"?Text("Showing Bevco Outlets",style: 
-                    TextStyle(color: Colors.white),):filterChoice=="toddy"?Text("Showing Toddy Shops",style: TextStyle(color: Colors.white)):
-                    Text("Bars on the way!",style: TextStyle(color: Colors.white)),
+                child: Marquee(
+                  text: 'Alcohol Consumption is injurious to health',
+                  style: TextStyle(fontWeight: FontWeight.bold,color: Colors.red[700]),
+                  scrollAxis: Axis.horizontal,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  blankSpace: 40.0,
+                  velocity: 100.0,
+                  pauseAfterRound: Duration(seconds: 1),
+                  startPadding: 20.0,
+                  accelerationDuration: Duration(seconds: 1),
+                  accelerationCurve: Curves.linear,
+                  decelerationDuration: Duration(milliseconds: 500),
+                  decelerationCurve: Curves.easeOut,
+                )
               ),
             ),
+            // Positioned(
+            //   top: 0.05*MediaQuery.of(context).size.height,
+            //   left: 0.7*MediaQuery.of(context).size.width,
+            //   child: AnimatedFab(onTap: (value){
+            //     BarMap.closeBottomSheet();
+            //     setState(() {
+            //      filterChoice=value; 
+            //     });
+            //   },),
+            // ),
             Positioned(
-              top: 0.05*MediaQuery.of(context).size.height,
-              left: 0.7*MediaQuery.of(context).size.width,
-              child: AnimatedFab(onTap: (value){
-                BarMap.closeBottomSheet();
-                setState(() {
-                 filterChoice=value; 
-                });
-              },),
-            ),
+              top: MediaQuery.of(context).size.height*0.096,
+              child: Container(
+                alignment: Alignment.center,
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10)
+                  ),
+                  width: MediaQuery.of(context).size.width*0.5,
+                  child: CupertinoSegmentedControl(
+                    pressedColor: Colors.deepOrange.withOpacity(0.2),
+                    borderColor: Colors.transparent,
+                    children: {
+                      'bevco':Container(
+                        child:Text("Bevco",style: TextStyle(fontSize: 15,fontWeight: FontWeight.bold),)),
+                      'toddy':Container(child:Text("Toddy",style: TextStyle(fontSize: 15,fontWeight: FontWeight.bold),))
+                    },
+                    selectedColor: Colors.deepOrange,
+                    groupValue: filterChoice,
+                    onValueChanged: ((value){
+                      BarMap.closeBottomSheet();
+                      mapController.animateCamera(CameraUpdate.newCameraPosition(
+                      CameraPosition(
+                          target: _center, zoom: 13)));
+                      setState(() {
+                        filterChoice=value; 
+                      });
+                    }),
+                  ),
+                ),
+              ),
+            )
 
         
       ]),
@@ -227,8 +271,8 @@ class _BarMap extends State<BarMap>{
   void onMarkerTapped(PlaceData place) async{
     url=List<String>();
     for(int photoId in place.photoId){
-      getUrl(place.placeId,photoId).then((value){
-      url.add(value);
+        getUrl(place.placeId,photoId).then((value){
+        url.add(value);
       });
     }
     setState(() {
@@ -256,6 +300,7 @@ class _BarMap extends State<BarMap>{
             isMarkerTapped=true;
           });
           stopperBottomSheet(context,place);
+          
   }
 
   Future<String> getUrl(placeId,photoId) async {
@@ -279,10 +324,12 @@ class _BarMap extends State<BarMap>{
         placeId=place.placePlaceId;
       }
     }
-    var bottomSheetController=showStopper(
+
+    PersistentBottomSheetController bottomSheetController=showStopper(
       userCanClose: false,
       context: context,
-      stops: [83,0.5 * h, 0.88*h],
+      initialStop: 1,
+      stops: [0,83,0.5 * h, 0.88*h],
       builder: (context, scrollController, scrollPhysics, stop) {
         return Container(
           color: Colors.black,

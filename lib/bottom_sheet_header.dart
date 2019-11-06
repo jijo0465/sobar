@@ -37,21 +37,9 @@ class BottomSheetHeader extends StatelessWidget{
             ],
           )),
           duration: const Duration(milliseconds: 210),
-          crossFadeState: (bottState!=2) ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+          crossFadeState: (bottState!=3) ? CrossFadeState.showFirst : CrossFadeState.showSecond,
       ),
 
-      // child: Column(
-      //   children: <Widget>[
-          
-      //     Container(
-      //       child: (bottState==1)?Icon(Icons.arrow_drop_up,):(bottState==2)?Icon(Icons.arrow_drop_down):Icon(Icons.arrow_drop_up)),
-      //     BottomSheetTitle(title:title),
-      //     (bottState!=2)?
-      //     Rating(rating:rating,totalRated: totalRated):Container(),
-      //     (bottState!=2)?
-      //     BottomSheetText(text:type):Container(),
-      //   ],
-      // ),
     );
   }
 

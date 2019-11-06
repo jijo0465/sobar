@@ -54,10 +54,15 @@ class _PriceList  extends State<PriceList>{
        @override
        Widget build(BuildContext context) {
          return Padding(
-           padding: const EdgeInsets.fromLTRB(3,80,3,0),
+           padding: const EdgeInsets.fromLTRB(3,50,3,0),
            child: Container(
              child: Column(
                children: <Widget>[
+                 Container(
+                   alignment: Alignment.centerLeft,
+                   padding: EdgeInsets.fromLTRB(8,12,0,0),
+                   child: Text('BEVCO Price List',style: TextStyle(color: Colors.deepOrange,fontSize: 20,fontWeight: FontWeight.bold),),
+                 ),
                  Container(
                    height: 70,
                    padding: EdgeInsets.all(12),
@@ -67,11 +72,17 @@ class _PriceList  extends State<PriceList>{
                        borderRadius: BorderRadius.all(Radius.circular(12)),
                        color: Colors.white12,
                        shape: BoxShape.rectangle,
-                       border: Border.all(color: Colors.orange,)
+                       border: Border.all(color: Colors.black26,)
                      ),
                      child: TextField(
+                       style: TextStyle(
+                         color: Colors.deepOrangeAccent[100]
+                       ),
+                       cursorColor: Colors.deepOrange,
+                       
                       focusNode: _focusNode,
                       decoration: InputDecoration(
+                      
                        border: InputBorder.none,
                        suffixIcon: isFocus?IconButton(
                          icon: Icon(Icons.close,
@@ -79,13 +90,16 @@ class _PriceList  extends State<PriceList>{
                           onPressed:(){
                             FocusScope.of(context).requestFocus(FocusNode());
                             
+                              _searchController.text='';
+                          
                             }): 
-                          Icon(Icons.search,color: Colors.orange,),
+                          Icon(Icons.search,color: Colors.white,),
                        contentPadding: EdgeInsets.fromLTRB(12, 2, 4, 0),
                        prefixText: "",
                        labelText: "Search..",
+                       
                        labelStyle: TextStyle(
-                         color: Colors.orange
+                         color: Colors.white
                        )
                      ),
                      controller: _searchController,
