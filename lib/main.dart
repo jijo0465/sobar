@@ -1,4 +1,3 @@
-import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +13,7 @@ import 'bar_map.dart';
 import 'calender_page.dart';
 import 'package:kudians/users.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:kudians/sqlite_db.dart';
 
 void main() => runApp(MyApp());
 
@@ -41,6 +41,7 @@ class _MyHomePageState extends State<MyHomePage> {
   SobarUsers sobarUser;
   int bottomNavSelected=0;
   bool holiday=true;
+  bool isEverythingCached=false;
   final FirebaseMessaging _messaging = FirebaseMessaging();
   static const List<Widget> _bottom_nav_options = <Widget>[
     BarMap(),
@@ -51,15 +52,20 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
+    SqliteDb().openSqlite().then((value){
+      setState(() {
+        isEverythingCached=true;
+      });
+    });
     if(!UserCache().isCached()){
       setUser();
     }
-    if(!PriceListCache().isCached()){
-      setAllKuppi();
-    }
-    if(!HolidaysCache().isCached()){
-      setHolidays();
-    }
+    // if(!PriceListCache().isCached()){
+    //   setAllKuppi();
+    // }
+    // if(!HolidaysCache().isCached()){
+    //   setHolidays();
+    // }
     _messaging.requestNotificationPermissions(
       const IosNotificationSettings(
         sound: true,
@@ -86,7 +92,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      body: Container(
+      body: isEverythingCached? Container(
         decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topRight,
@@ -113,12 +119,12 @@ class _MyHomePageState extends State<MyHomePage> {
           //   child: Image.asset("assets/sobar_logo.png")
           // )
         ],),
-      ),
-      // bottomNavigationBar: 
+      ):Center(child: Container(
+        child: CupertinoActivityIndicator(animating: true,)
+        )),
         );
       }
 
-  
   void setUser(){
     FirebaseUser user;
     FirebaseAuth.instance.currentUser().then((value){

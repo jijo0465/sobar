@@ -1,9 +1,12 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:kudians/calendar.dart';
 import 'package:kudians/firebase_services.dart';
 import 'package:kudians/holidays_cache.dart';
 import 'package:kudians/sobar_holiday_list.dart';
 import 'holidays.dart';
+import 'package:firebase_admob/firebase_admob.dart';
+import 'app_id.dart' show APP_ID;
 
 class CalendarPage extends StatefulWidget{
   const CalendarPage();
@@ -20,20 +23,47 @@ class CalendarPage extends StatefulWidget{
     int _numOfHolidays;
     bool isHolidaySet= false;
     DateTime today = DateTime.now();
+    bool interstitialIsLoaded=false;
+    static final MobileAdTargetingInfo targetingInfo= MobileAdTargetingInfo(
+      testDevices: APP_ID !=null? [APP_ID] : null,
+      keywords: ['Games','Puzzles']
+    );
+
+    InterstitialAd interstitialAd;
+    InterstitialAd buildInterstitialAd(){
+      return InterstitialAd(
+        adUnitId: InterstitialAd.testAdUnitId,
+        targetingInfo: targetingInfo,
+        listener: (MobileAdEvent event){
+          if(event==MobileAdEvent.failedToLoad){
+            interstitialAd..load();
+          }else if(event == MobileAdEvent.closed){
+            interstitialAd = buildInterstitialAd()..load();
+          }
+        }
+      );
+    }
       @override
-    void initState() {
+    initState() {
       if(HolidaysCache().isCached()){
          holidays=HolidaysCache().getHolidaysList();
         _holidays=HolidaysCache().getHolidates();
         _numOfHolidays=HolidaysCache().getNumOfHolidays();
-        print(_numOfHolidays);
         setState(() {
          isHolidaySet=true; 
         });
       }else{
         setHolidays();
       }
+      FirebaseAdMob.instance.initialize(appId: FirebaseAdMob.testAppId);
+      interstitialAd = buildInterstitialAd()..load();
+      interstitialAd..load()..show();
       super.initState();
+  }
+    @override
+  void dispose() {
+    interstitialAd?.dispose();
+    super.dispose();
   }
       @override
       Widget build(BuildContext context) {
@@ -42,16 +72,19 @@ class CalendarPage extends StatefulWidget{
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 90, 0, 0),
-                child: Calendar(_holidays),
+              Container(
+                padding: EdgeInsets.fromLTRB(20, 40, 0, 0),
+                alignment: Alignment.centerLeft,
+                child: Text('DRY Days',
+                    style: TextStyle(color: Colors.deepOrange,fontSize: 20,fontWeight: FontWeight.w500, letterSpacing: 0.3),),
               ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 0, 0, 65),
-                child: SizedBox(
-                  height: 110,
-                  child: SobarHolidayList(holidays: holidays,numOfHolidays: _numOfHolidays,),
-                ),
+              Calendar(_holidays),
+              SizedBox(
+                height: 110,
+                child: SobarHolidayList(holidays: holidays,numOfHolidays: _numOfHolidays,),
+              ),
+              SizedBox(
+                height: 50,
               )
             ],
           ),
@@ -73,4 +106,12 @@ class CalendarPage extends StatefulWidget{
         });
       });
     }
+    String getBannerAdUnitId() {
+  if (Platform.isIOS) {
+    return 'ca-app-pub-3940256099942544/2934735716';
+  } else if (Platform.isAndroid) {
+    return 'ca-app-pub-3940256099942544/6300978111';
+    }
+    return null;
+  }
 }

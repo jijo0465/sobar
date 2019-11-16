@@ -43,6 +43,7 @@ class SobarFormField extends StatelessWidget{
             child: Container(
               padding: (maxLines>1)? EdgeInsets.fromLTRB(0, 0, 50, 0):EdgeInsets.fromLTRB(0, 0, 8, 0),
               child: TextFormField(
+                textInputAction: TextInputAction.done,
                 enabled: enabled,
                 onChanged: (string){
                   this.onChanged(string);

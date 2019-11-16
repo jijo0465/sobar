@@ -37,7 +37,7 @@ class BottomSheetHeader extends StatelessWidget{
             ],
           )),
           duration: const Duration(milliseconds: 210),
-          crossFadeState: (bottState!=3) ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+          crossFadeState: (bottState!=1) ? CrossFadeState.showFirst : CrossFadeState.showSecond,
       ),
 
     );

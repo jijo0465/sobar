@@ -18,6 +18,7 @@ import "package:google_maps_webservice/places.dart";
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:stopper/stopper.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 const MAP_API="AIzaSyAR6yclpjdj-1q8bwtOdvYm5JpKG7KOmCU";
 
@@ -30,8 +31,6 @@ class BarMap extends StatefulWidget{
       }
 
   static closeBottomSheet() async {
-    print("object");
-    print(bottomSheetController);
     if(bottomSheetController!=null){
       bottomSheetController.close();
       bottomSheetController=null;
@@ -56,12 +55,10 @@ class _BarMap extends State<BarMap>{
   BitmapDescriptor toddyIcon;
   BitmapDescriptor barIcon;
   bool isMarkerTapped;
-  String tappedMarkerId;
   GoogleMapsPlaces places;
   PlaceDetails placeDetails;
   PlacesDetailsResponse placesDetailsResponse;
   Bars tappedBar;
-  PlaceData tappedPlace;
   bool urlSet=false;
   List<String> url;
   String filterChoice;
@@ -69,329 +66,330 @@ class _BarMap extends State<BarMap>{
   bool isLocationEnabled=false;
   LatLng _center = LatLng(9.9312, 76.2673);
   final snackBar = SnackBar(content: Text('Please allow the location permission!'));
+  PermissionStatus _status;
   @override
   void initState() {
     _geolocator=Geolocator();
-    setUserLocation();
-    super.initState();
-    filterChoice="bevco";
-    rootBundle.loadString('assets/map_style.json').then((string) {
-    _mapStyle = string;
-    });
-    places = GoogleMapsPlaces(apiKey: MAP_API);
-    allBevco=List<PlaceData>();
-    isMarkerTapped=false;
-    allPlaces=List<PlaceData>();
-    if(MapCache().isIconsCached()){
-      barIcon=MapCache().getBevcoIcon();
-      toddyIcon=MapCache().getToddyIcon();
-    }else{
-      BitmapDescriptor.fromAssetImage(
-        ImageConfiguration(size: Size.fromHeight(20)), 'assets/bevco_marker.png')
-        .then((onValue) {
-          barIcon = onValue;
-          BitmapDescriptor.fromAssetImage(
-            ImageConfiguration(size: Size(15, 15)), 'assets/toddy_marker.png')
-            .then((value) {
-              toddyIcon = value;
-              MapCache().setIcons(toddyIcon, barIcon);
+    checkPermission();
+        super.initState();
+        filterChoice="bevco";
+        rootBundle.loadString('assets/map_style.json').then((string) {
+        _mapStyle = string;
         });
-    });
-    }
-    
-    allBars=List<Bars>();
-    firebaseServices=FirebaseServices();
-    // firebaseServices.getAllBars().then((bars){
-    //   setState(() {
-    //     allBars=bars;
-    //   });
-    // });
-    if(MapCache().isAllBevcoCached()){
-      setState(() {
-        allBevco=MapCache().getAllBevco();
-      });
-      
-    }else{
-      firebaseServices.getAllBevco().then((bevco){
-      setState(() {
-        allBevco=bevco;
-      });
-      MapCache().setAllBevco(allBevco);
-      });
-    }
-    if(MapCache().isAllToddyCached()){
-      setState(() {
-       allToddy=MapCache().getAllToddy(); 
-      });
-    }else{
-      firebaseServices.getAllToddy().then((toddy){
-      setState(() {
-        allToddy=toddy;
-      });
-      MapCache().setAllToddy(allToddy);
-      });
-    }
-    
-  }
-  void _onMapCreated(GoogleMapController controller) {
-    mapController = controller;
-    mapController.setMapStyle(_mapStyle);
-  }
-  @override
-  Widget build(BuildContext context) {
-    if(filterChoice=="bevco"){
-      imgRef=FirebaseStorage.instance.ref().child('kerala_bevco');
-      markers=Set<Marker>();
-      if(allBevco!=null){
-      for(PlaceData bevco in allBevco){
-        Marker marker=getMarker(bevco);
-          markers.add(marker);
+        places = GoogleMapsPlaces(apiKey: MAP_API);
+        allBevco=List<PlaceData>();
+        isMarkerTapped=false;
+        allPlaces=List<PlaceData>();
+        if(MapCache().isIconsCached()){
+          barIcon=MapCache().getBevcoIcon();
+          toddyIcon=MapCache().getToddyIcon();
+        }else{
+          BitmapDescriptor.fromAssetImage(
+            ImageConfiguration(size: Size.fromHeight(20)), 'assets/bevco_marker.png')
+            .then((onValue) {
+              barIcon = onValue;
+              BitmapDescriptor.fromAssetImage(
+                ImageConfiguration(size: Size(15, 15)), 'assets/toddy_marker.png')
+                .then((value) {
+                  toddyIcon = value;
+                  MapCache().setIcons(toddyIcon, barIcon);
+            });
+        });
         }
-      }
-    }else if(filterChoice=="toddy"){
-      imgRef=FirebaseStorage.instance.ref().child('kerala_toddy_shops');
-      markers=Set<Marker>();
-      if(allToddy!=null){
-      for(PlaceData toddy in allToddy){
-        Marker marker=getMarker(toddy);
-          markers.add(marker);
-        }
-      }
-    }else if(filterChoice=="bar"){
-      markers=Set<Marker>();
-    }
-    
-    return Container(
-      child: Stack(
-        alignment: Alignment.center,
-        children: <Widget>[
-        Container(
-        height: MediaQuery.of(context).size.height,
-        width: MediaQuery.of(context).size.width,
-        child:GoogleMap(
-          myLocationEnabled: true,
-          myLocationButtonEnabled: false,
-          tiltGesturesEnabled: true,
-          mapToolbarEnabled: false,
-          mapType: MapType.normal,
-          markers: markers,
-          onMapCreated: _onMapCreated,
-          initialCameraPosition: CameraPosition(
-              target: _center,
-              zoom: 8.0,
-            ))),
-              Positioned(
-              bottom: 0.15*MediaQuery.of(context).size.height,
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(6),
-                  color: Colors.white.withOpacity(0.08),
-                ),
-                alignment: Alignment.center,
-                width: 0.72*MediaQuery.of(context).size.width,
-                height: 30,
-                child: Marquee(
-                  text: 'Alcohol Consumption is injurious to health',
-                  style: TextStyle(fontWeight: FontWeight.bold,color: Colors.red[700]),
-                  scrollAxis: Axis.horizontal,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  blankSpace: 40.0,
-                  velocity: 100.0,
-                  pauseAfterRound: Duration(seconds: 1),
-                  startPadding: 20.0,
-                  accelerationDuration: Duration(seconds: 1),
-                  accelerationCurve: Curves.linear,
-                  decelerationDuration: Duration(milliseconds: 500),
-                  decelerationCurve: Curves.easeOut,
-                )
-              ),
-            ),
-            // Positioned(
-            //   top: 0.05*MediaQuery.of(context).size.height,
-            //   left: 0.7*MediaQuery.of(context).size.width,
-            //   child: AnimatedFab(onTap: (value){
-            //     BarMap.closeBottomSheet();
-            //     setState(() {
-            //      filterChoice=value; 
-            //     });
-            //   },),
-            // ),
-            Positioned(
-              top: MediaQuery.of(context).size.height*0.096,
-              child: Container(
-                alignment: Alignment.center,
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10)
-                  ),
-                  width: MediaQuery.of(context).size.width*0.5,
-                  child: CupertinoSegmentedControl(
-                    pressedColor: Colors.deepOrange.withOpacity(0.2),
-                    borderColor: Colors.transparent,
-                    children: {
-                      'bevco':Container(
-                        child:Text("Bevco",style: TextStyle(fontSize: 15,fontWeight: FontWeight.bold),)),
-                      'toddy':Container(child:Text("Toddy",style: TextStyle(fontSize: 15,fontWeight: FontWeight.bold),))
-                    },
-                    selectedColor: Colors.deepOrange,
-                    groupValue: filterChoice,
-                    onValueChanged: ((value){
-                      BarMap.closeBottomSheet();
-                      mapController.animateCamera(CameraUpdate.newCameraPosition(
-                      CameraPosition(
-                          target: _center, zoom: 13)));
-                      setState(() {
-                        filterChoice=value; 
-                      });
-                    }),
-                  ),
-                ),
-              ),
-            )
-
         
-      ]),
-    );
-  }
-  Marker getMarker(PlaceData bevco){
-    BitmapDescriptor marker;
-    if(filterChoice=='bevco'){
-      marker=barIcon;
-    }else if(filterChoice=='toddy'){
-      marker=toddyIcon;
-    }
-    return Marker(markerId: MarkerId(bevco.placeId.toString()),
-    position: bevco.placeLocation, 
-    icon: marker,
-    onTap: (){
-      onMarkerTapped(bevco);
-    });
-    }
-              
-  void onMarkerTapped(PlaceData place) async{
-    url=List<String>();
-    for(int photoId in place.photoId){
-        getUrl(place.placeId,photoId).then((value){
-        url.add(value);
-      });
-    }
-    setState(() {
-      urlSet=true;
-    });
-    
-      // placesDetailsResponse = await places.getDetailsByPlaceId(bar.placeId);
-      // if(placesDetailsResponse.status=="OK"){
-      //   setState(() {
-      //    placeDetails=placesDetailsResponse.result;
-      //   });
-      //    print(placesDetailsResponse.result.name);
-      // }else if(placesDetailsResponse.status=="OVER_QUERY_LIMIT"){
-      //   sleep(Duration(seconds: 3));
-      //   setState(() {
-      //    placeDetails=placesDetailsResponse.result;
-      //   });
-      // }
-      tappedPlace=tappedPlace;
-      tappedMarkerId=place.placeId.toString();
-      mapController.animateCamera(CameraUpdate.newCameraPosition(
-          CameraPosition(
-              target: place.placeLocation, zoom: 15)));
+        allBars=List<Bars>();
+        firebaseServices=FirebaseServices();
+        // firebaseServices.getAllBars().then((bars){
+        //   setState(() {
+        //     allBars=bars;
+        //   });
+        // });
+        if(MapCache().isAllBevcoCached()){
           setState(() {
-            isMarkerTapped=true;
+            allBevco=MapCache().getAllBevco();
           });
-          stopperBottomSheet(context,place);
           
-  }
-
-  Future<String> getUrl(placeId,photoId) async {
-    String url = await imgRef.child(placeId.toString()+'_'+photoId.toString()+'.jpg').getDownloadURL();
-    return url;
-  }
-  stopperBottomSheet(context,PlaceData place){
-    final h = MediaQuery.of(context).size.height;
-    String type;
-    String address;
-    String phone;
-    LatLng latLng;
-    String placeId='';
-    var reviews=place.reviews;
-    if(place is PlaceData){
-      type="Bevco Outlet";
-      address=place.placeAddress;
-      phone=place.placePhone;
-      latLng=place.placeLocation;
-      if(place.placePlaceId!=null){
-        placeId=place.placePlaceId;
+        }else{
+          // firebaseServices.getAllBevco().then((bevco){
+          // setState(() {
+          //   allBevco=bevco;
+          // });
+          // MapCache().setAllBevco(allBevco);
+          // });
+        }
+        if(MapCache().isAllToddyCached()){
+          setState(() {
+           allToddy=MapCache().getAllToddy();
+          });
+        }else{
+          // firebaseServices.getAllToddy().then((toddy){
+          // setState(() {
+          //   allToddy=toddy;
+          // });
+          // MapCache().setAllToddy(allToddy);
+          // });
+        }
+        
       }
-    }
-
-    PersistentBottomSheetController bottomSheetController=showStopper(
-      userCanClose: false,
-      context: context,
-      initialStop: 1,
-      stops: [0,83,0.5 * h, 0.88*h],
-      builder: (context, scrollController, scrollPhysics, stop) {
+      void _onMapCreated(GoogleMapController controller) {
+        mapController = controller;
+        mapController.setMapStyle(_mapStyle);
+      }
+      @override
+      Widget build(BuildContext context) {
+        if(filterChoice=="bevco"){
+          imgRef=FirebaseStorage.instance.ref().child('kerala_bevco');
+          markers=Set<Marker>();
+          if(allBevco!=null){
+          for(PlaceData bevco in allBevco){
+            Marker marker=getMarker(bevco);
+              markers.add(marker);
+            }
+          }
+        }else if(filterChoice=="toddy"){
+          imgRef=FirebaseStorage.instance.ref().child('kerala_toddy_shops');
+          markers=Set<Marker>();
+          if(allToddy!=null){
+          for(PlaceData toddy in allToddy){
+            Marker marker=getMarker(toddy);
+              markers.add(marker);
+            }
+          }
+        }
+        
         return Container(
-          color: Colors.black,
-          child: ClipRRect(
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: Container(
-              margin: EdgeInsets.fromLTRB(5, 0, 5, 0),
-              color: Colors.orange[200],
-              child: Column(
-                children: <Widget>[
-                  BottomSheetHeader(title: place.placeName,rating: place.placeRating,totalRated: place.placeTotalRating,type: type,bottState: stop,),
-                  Expanded(
-                    child: CustomScrollView(
-                    slivers: <Widget>[
-                      SliverList(
-                        delegate: SliverChildListDelegate(
-                          [
-                            SobarDivider(),
-                            BottomSheetAddressPhone(address: address,phone: phone, latLng: latLng, placeId: placeId, name:place.placeName),
-                            SobarDivider(),
-                            urlSet?PhotoList(count: url.length,url: url,title: place.placeName, source: "network",):Container(),
-                            SuggestEdit(placeData: place,type:filterChoice),
-                            ReviewRate(placeId: place.placeId,placeName: place.placeName,placeType: filterChoice),
-                            SobarDivider(),
-                          ]
-                        ),
-                      ),ReviewList(reviews: reviews,)
+          child: Stack(
+            alignment: Alignment.center,
+            children: <Widget>[
+            Container(
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
+            child:GoogleMap(
+              myLocationEnabled: true,
+              myLocationButtonEnabled: false,
+              tiltGesturesEnabled: true,
+              mapToolbarEnabled: false,
+              mapType: MapType.normal,
+              markers: markers,
+              onMapCreated: _onMapCreated,
+              initialCameraPosition: CameraPosition(
+                  target: _center,
+                  zoom: 8.0,
+                ))),
+                  Positioned(
+                  bottom: 0.15*MediaQuery.of(context).size.height,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(6),
+                      color: Colors.white.withOpacity(0.08),
+                    ),
+                    alignment: Alignment.center,
+                    width: 0.72*MediaQuery.of(context).size.width,
+                    height: 30,
+                    child: Marquee(
+                      text: 'Alcohol Consumption is injurious to health',
+                      style: TextStyle(fontWeight: FontWeight.bold,color: Colors.red[700]),
+                      scrollAxis: Axis.horizontal,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      blankSpace: 40.0,
+                      velocity: 100.0,
+                      pauseAfterRound: Duration(seconds: 1),
+                      startPadding: 20.0,
+                      accelerationDuration: Duration(seconds: 1),
+                      accelerationCurve: Curves.linear,
+                      decelerationDuration: Duration(milliseconds: 500),
+                      decelerationCurve: Curves.easeOut,
+                    )
+                  ),
+                ),
+                Positioned(
+                  top: MediaQuery.of(context).size.height*0.096,
+                  child: Container(
+                    alignment: Alignment.center,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10)
+                      ),
+                      width: MediaQuery.of(context).size.width*0.5,
+                      child: CupertinoSegmentedControl(
+                        pressedColor: Colors.deepOrange.withOpacity(0.2),
+                        borderColor: Colors.transparent,
+                        children: {
+                          'bevco':Container(
+                            child:Text("Bevco",style: TextStyle(fontSize: 15,fontWeight: FontWeight.bold),)),
+                          'toddy':Container(child:Text("Toddy",style: TextStyle(fontSize: 15,fontWeight: FontWeight.bold),))
+                        },
+                        selectedColor: Colors.deepOrange,
+                        groupValue: filterChoice,
+                        onValueChanged: ((value){
+                          BarMap.closeBottomSheet();
+                          mapController.animateCamera(CameraUpdate.newCameraPosition(
+                          CameraPosition(
+                              target: _center, zoom: 13)));
+                          setState(() {
+                            filterChoice=value; 
+                          });
+                        }),
+                      ),
+                    ),
+                  ),
+                )
+    
+            
+          ]),
+        );
+      }
+      Marker getMarker(PlaceData bevco){
+        BitmapDescriptor marker;
+        if(filterChoice=='bevco'){
+          marker=barIcon;
+        }else if(filterChoice=='toddy'){
+          marker=toddyIcon;
+        }
+        return Marker(markerId: MarkerId(bevco.placeId.toString()),
+        position: bevco.placeLocation, 
+        icon: marker,
+        onTap: (){
+          onMarkerTapped(bevco);
+        });
+        }
+                  
+      void onMarkerTapped(PlaceData place) async{
+          mapController.animateCamera(CameraUpdate.newCameraPosition(
+              CameraPosition(
+                  target: place.placeLocation, zoom: 15)));
+              
+              stopperBottomSheet(context,place);
+              
+      }
+    
+      Future<String> getUrl(placeId,photoId) async {
+        String url = await imgRef.child(placeId.toString()+'_'+photoId.toString()+'.jpg').getDownloadURL();
+        return url;
+      }
+      stopperBottomSheet(context,PlaceData place){
+        int placeId=place.placeId;
+        String placePlaceId='';
+        url=List<String>();
+        List<Map<String,dynamic>> reviews=List();
+        firebaseServices.getPhotoReview(placeId,filterChoice).then((value){
+            
+            setState(() {
+              reviews=value['reviews'];
+            });
+              for(int photoId in value['photos']){
+                print(placeId);
+                getUrl(placeId,photoId).then((value){
+                  print(value);
+                  url.add(value);
+          });
+        }
+        setState(() {
+          urlSet=true;
+        });
+        });
+        final h = MediaQuery.of(context).size.height;
+        String type;
+        String address;
+        String phone;
+        LatLng latLng;
+        
+        if(filterChoice=='bevco'){
+          type="Bevco Outlet";
+        }else if(filterChoice=='toddy'){
+          type="Toddy Shop";
+        }
+          address=place.placeAddress;
+          phone=place.placePhone;
+          latLng=place.placeLocation;
+          if(place.placePlaceId!=null){
+            placePlaceId=place.placePlaceId;
+        }
+    
+        PersistentBottomSheetController bottomSheetController=showStopper(
+          userCanClose: true,
+          context: context,
+          initialStop: 0,
+          stops: [0.4 * h, 0.95*h],
+          builder: (context, scrollController, scrollPhysics, stop) {
+            return Container(
+              color: Colors.black,
+              child: ClipRRect(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: Container(
+                  margin: EdgeInsets.fromLTRB(5, 0, 5, 0),
+                  color: Colors.orange[200],
+                  child: Column(
+                    children: <Widget>[
+                      BottomSheetHeader(title: place.placeName,rating: place.placeRating,totalRated: place.placeTotalRating,type: type,bottState: stop,),
+                      Expanded(
+                        child: CustomScrollView(
+                        slivers: <Widget>[
+                          SliverList(
+                            delegate: SliverChildListDelegate(
+                              [
+                                SobarDivider(),
+                                BottomSheetAddressPhone(address: address,phone: phone, latLng: latLng, placeId: placePlaceId, name:place.placeName),
+                                SobarDivider(),
+                                urlSet?PhotoList(count: url.length,url: url,title: place.placeName, source: "network",):Container(),
+                                SuggestEdit(placeData: place,type:filterChoice),
+                                ReviewRate(placeId: place.placeId,placeName: place.placeName,placeType: filterChoice),
+                                SobarDivider(),
+                              ]
+                            ),
+                          ),
+                          ReviewList(reviews: reviews,)
+                        ],
+                        controller: scrollController,
+                        physics: scrollPhysics,
+                                  ),
+                      )
                       
                     ],
-                    controller: scrollController,
-                    physics: scrollPhysics,
-                              ),
-                  )
-                  
-                ],
-              ),
-                        ),
-                      ),
-        );
-                  },
-                );
-      widget.setBottomSheetController(bottomSheetController);        
-  }
-
-  setUserLocation()async{
-    
-    // Scaffold.of(context).showSnackBar(snackBar);
-    _geolocator.checkGeolocationPermissionStatus().then((status) async {
-      if(status==GeolocationStatus.granted){
-        position = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-         isLocationEnabled=true;
-         _center=LatLng(position.latitude, position.longitude);
-        mapController.animateCamera(CameraUpdate.newCameraPosition(
-          CameraPosition(
-              target: _center, zoom: 13)));
+                  ),
+                            ),
+                          ),
+            );
+                      },
+                    );
+          widget.setBottomSheetController(bottomSheetController);        
       }
-    });
-    // position = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-    // geolocationStatus
-  }
+    
+      setUserLocation()async{
+        
+        // Scaffold.of(context).showSnackBar(snackBar);
+        _geolocator.checkGeolocationPermissionStatus().then((status) async {
+          if(status==GeolocationStatus.granted){
+            position = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+             _center=LatLng(position.latitude, position.longitude);
+            mapController.animateCamera(CameraUpdate.newCameraPosition(
+              CameraPosition(
+                  target: _center, zoom: 13)));
+          }
+        });
+        // position = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+        // geolocationStatus
+      }
+    
+      void checkPermission() async{
+        PermissionStatus permission = await PermissionHandler().checkPermissionStatus(PermissionGroup.location);
+          _status=permission;
+        if(_status==PermissionStatus.unknown||_status==PermissionStatus.denied){
+          PermissionHandler().requestPermissions([PermissionGroup.locationWhenInUse]).then((value){
+            final status = value[PermissionGroup.locationWhenInUse];
+            if(status!=PermissionStatus.granted){
+              PermissionHandler().openAppSettings();
+            }else{
+              _status = status;
+            }
+            
+          });
+        }else{
+          setUserLocation();
+        }
+      }
 }

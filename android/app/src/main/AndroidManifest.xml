@@ -21,6 +21,9 @@
         <receiver android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />
         <meta-data android:name="com.google.android.geo.API_KEY"
                android:value="AIzaSyAR6yclpjdj-1q8bwtOdvYm5JpKG7KOmCU"/>
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-7846270136949123~1344336645"/>
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"

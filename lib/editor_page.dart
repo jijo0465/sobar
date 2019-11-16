@@ -33,7 +33,6 @@ class _EditorPage extends State<EditorPage>{
   @override
   void initState() {
     super.initState();
-    print("Typeeee"+widget.type);
     type=widget.type;
     isClosed=false;
     currentLocation=widget.placeData.placeLocation;

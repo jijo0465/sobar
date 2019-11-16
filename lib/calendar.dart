@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_calendar_carousel/classes/event.dart';
 import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart';
@@ -10,11 +11,13 @@ class Calendar extends StatelessWidget{
   Widget build(BuildContext context) { 
     return Container(
       child: CalendarCarousel(
+        weekendTextStyle: TextStyle(color: Colors.deepOrange[100]),
         showHeaderButton: true,
-        headerTextStyle: TextStyle(color: Colors.deepOrange[800],fontSize: 25,),
-        leftButtonIcon: Icon(Icons.arrow_left,size: 35,color: Colors.deepOrange,),
-        rightButtonIcon: Icon(Icons.arrow_right,size: 35,color: Colors.deepOrange),
+        headerTextStyle: TextStyle(color: Colors.white.withOpacity(0.9),fontSize: 25,),
+        leftButtonIcon: Icon(CupertinoIcons.left_chevron,size: 25,color: Colors.white,),
+        rightButtonIcon: Icon(CupertinoIcons.right_chevron,size: 25,color: Colors.white ),
         markedDateIconBorderColor: Colors.red,
+        weekdayTextStyle: TextStyle(color: Colors.deepOrange[300]),
         markedDatesMap: getEventList(),
         markedDateShowIcon: true,
         markedDateMoreShowTotal: null,

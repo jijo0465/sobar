@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -11,7 +10,6 @@ import 'package:kudians/place_data.dart';
 import 'package:kudians/review_data.dart';
 import 'package:kudians/users.dart';
 import 'package:uuid/uuid.dart';
-
 import 'bars.dart';
 
 class FirebaseServices{
@@ -41,89 +39,86 @@ class FirebaseServices{
     return allBars;
   }
 
-  Future<List<PlaceData>> getAllBevco() async {
-    PlaceData bevco;
-    List<PlaceData> allBevco=List<PlaceData>();
-    await firestore.collection("kerala_bevco").getDocuments().then((docs){
-      if(docs.documents.isNotEmpty){
-          for(int i=0;i<docs.documents.length;i++){
-            List<dynamic> review=new List<dynamic>();
-            List<int> photoIds=new List<int>();
-            var data=docs.documents[i].data;
-            int bevcoId=data['bevco_id'];
-            LatLng bevcoLocation=LatLng(data['bevco_lat'],data['bevco_lng']);
-            String bevcoName=data['bevco_name'];
-            String bevcoAddress=data['bevco_address'];
-            double bevcoRating=data['bevco_rating'];
-            int bevcoTotalRating=data['bevco_total_rating'];
-            String bevcoPlaceId=data['bevco_placeId'];
-            String bevcoDistrict=data['bevco_district'];
-            String bevcoPhone="";
-            if(data.containsKey('bevco_phone')){
-              bevcoPhone=data['bevco_phone'];
-            }
-            if(data.containsKey('bevco_photo_ids')){
-              photoIds=data['bevco_photo_ids'].cast<int>();
-            }
-            
-            review=data['reviews'];
-            
-            List<Map<String,dynamic>> reviews=List<Map<String,dynamic>>();
-            if(review!=null){
-              for(int i=0;i<review.length;i++){
-                Map<String,dynamic> rev= Map<String, dynamic>.from(review[i]);
-                reviews.add(rev);
-              }
-            }
-            bevco=PlaceData(bevcoId, bevcoLocation, bevcoName, bevcoAddress, bevcoRating, bevcoTotalRating, bevcoPlaceId, bevcoDistrict, bevcoPhone,reviews,photoIds);
-            allBevco.add(bevco);
-          }
-        }
-    });
-    return allBevco;
-  }
-
-  Future<List<PlaceData>> getAllToddy() async {
-    PlaceData toddy;
-    List<PlaceData> alltoddy=List<PlaceData>();
-    await firestore.collection("kerala_toddy_shop").getDocuments().then((docs){
-      if(docs.documents.isNotEmpty){
-          for(int i=0;i<docs.documents.length;i++){
-            List<dynamic> review=new List<dynamic>();
-            List<int> photoIds=new List<int>();
-            var data=docs.documents[i].data;
-            int toddyId=data['toddy_shop_id'];
-            LatLng toddyLocation=LatLng(data['toddy_lat'],data['toddy_lng']);
-            String toddyName=data['toddy_name'];
-            String toddyAddress=data['toddy_address'];
-            double toddyRating=data['toddy_rating'];
-            int toddyTotalRating=data['toddy_total_rating'];
-            String toddyPlaceId=data['toddy_placeId'];
-            String toddyDistrict=data['toddy_district'];
-            String toddyPhone="";
-            if(data.containsKey('toddy_phone')){
-              toddyPhone=data['toddy_phone'];
-            }
-            if(data.containsKey('toddy_photo_ids')){
-              photoIds=data['toddy_photo_ids'].cast<int>();
-            }
-            
-            review=data['toddy_reviews'];
-            
-            List<Map<String,dynamic>> reviews=List<Map<String,dynamic>>();
-            if(review!=null){
-              for(int i=0;i<review.length;i++){
-                Map<String,dynamic> rev= Map<String, dynamic>.from(review[i]);
-                reviews.add(rev);
-              }
-            }
-            toddy=PlaceData(toddyId, toddyLocation, toddyName, toddyAddress, toddyRating, toddyTotalRating, toddyPlaceId, toddyDistrict, toddyPhone,reviews,photoIds);
-            alltoddy.add(toddy);
-          }
-        }
-    });
-    return alltoddy;
-  }
+  // Future<List<PlaceData>> getAllBevco() async {
+  //   PlaceData bevco;
+  //   List<PlaceData> allBevco=List<PlaceData>();
+  //   await firestore.collection("kerala_bevco").getDocuments().then((docs){
+  //     if(docs.documents.isNotEmpty){
+  //         for(int i=0;i<docs.documents.length;i++){
+  //           List<dynamic> review=new List<dynamic>();
+  //           List<int> photoIds=new List<int>();
+  //           var data=docs.documents[i].data;
+  //           int bevcoId=data['bevco_id'];
+  //           double latitude=data['bevco_lat'];
+  //           double longitude=data['bevco_lng'];
+  //           LatLng bevcoLocation=LatLng(latitude,longitude);
+  //           String bevcoName=data['bevco_name'];
+  //           String bevcoAddress=data['bevco_address'];
+  //           double bevcoRating=data['bevco_rating'];
+  //           int bevcoTotalRating=data['bevco_total_rating'];
+  //           String bevcoPlaceId=data['bevco_placeId'];
+  //           String bevcoDistrict=data['bevco_district'];
+  //           String bevcoPhone="";
+  //           if(data.containsKey('bevco_phone')){
+  //             bevcoPhone=data['bevco_phone'];
+  //           }
+  //           if(data.containsKey('bevco_photo_ids')){
+  //             photoIds=data['bevco_photo_ids'].cast<int>();
+  //           }
+  //           review=data['reviews'];
+  //           List<Map<String,dynamic>> reviews=List<Map<String,dynamic>>();
+  //           if(review!=null){
+  //             for(int i=0;i<review.length;i++){
+  //               Map<String,dynamic> rev= Map<String, dynamic>.from(review[i]);
+  //               reviews.add(rev);
+  //             }
+  //           }
+  //           // bevco=PlaceData(bevcoId, bevcoLocation, bevcoName, bevcoAddress, bevcoRating, bevcoTotalRating, bevcoPlaceId, bevcoDistrict, bevcoPhone,reviews,photoIds);
+  //           allBevco.add(bevco);
+  //         }
+  //       }
+  //   });
+  //   return allBevco;
+  // }
+  // Future<List<PlaceData>> getAllToddy() async {
+  //   PlaceData toddy;
+  //   List<PlaceData> alltoddy=List<PlaceData>();
+  //   await firestore.collection("kerala_toddy_shop").getDocuments().then((docs){
+  //     if(docs.documents.isNotEmpty){
+  //         for(int i=0;i<docs.documents.length;i++){
+  //           List<dynamic> review=new List<dynamic>();
+  //           List<int> photoIds=new List<int>();
+  //           var data=docs.documents[i].data;
+  //           int toddyId=data['toddy_shop_id'];
+  //           LatLng toddyLocation=LatLng(data['toddy_lat'],data['toddy_lng']);
+  //           String toddyName=data['toddy_name'];
+  //           String toddyAddress=data['toddy_address'];
+  //           double toddyRating=data['toddy_rating'];
+  //           int toddyTotalRating=data['toddy_total_rating'];
+  //           String toddyPlaceId=data['toddy_placeId'];
+  //           String toddyDistrict=data['toddy_district'];
+  //           String toddyPhone="";
+  //           if(data.containsKey('toddy_phone')){
+  //             toddyPhone=data['toddy_phone'];
+  //           }
+  //           if(data.containsKey('toddy_photo_ids')){
+  //             photoIds=data['toddy_photo_ids'].cast<int>();
+  //           }
+  //           review=data['toddy_reviews'];
+  //           List<Map<String,dynamic>> reviews=List<Map<String,dynamic>>();
+  //           if(review!=null){
+  //             for(int i=0;i<review.length;i++){
+  //               Map<String,dynamic> rev= Map<String, dynamic>.from(review[i]);
+  //               reviews.add(rev);
+  //             }
+  //           }
+  //           // toddy=PlaceData(toddyId, toddyLocation, toddyName, toddyAddress, toddyRating, toddyTotalRating, toddyPlaceId, toddyDistrict, toddyPhone,reviews,photoIds);
+  //           alltoddy.add(toddy);
+  //         }
+  //       }
+  //   });
+  //   return alltoddy;
+  // }
   void updatePlaceEdit(EditedPlace place){
     String collection="edited_"+place.database;
     String document=place.database+'_'+place.placeId.toString();
@@ -182,7 +177,6 @@ class FirebaseServices{
     final StorageReference _ref=FirebaseStorage.instance.ref().child('user_dp').child(uid);
     StorageUploadTask uploadTask =_ref.putFile(File(filePath));
     final StorageTaskSnapshot downloadUrl = await uploadTask.onComplete;
-    print('File Uploaded');
     DocumentReference docRef=firestore.collection('sobar_users').document(uid);
     photoUrl = await downloadUrl.ref.getDownloadURL();
     docRef.get().then((doc){
@@ -230,6 +224,7 @@ class FirebaseServices{
     }
 
     Future<List<Kuppi>> getAllKuppi()async{
+      
       List<Kuppi> kuppiList=List<Kuppi>();
       Kuppi kuppi;
       await firestore.collection("kerala_bevco_price").getDocuments().then((docs){
@@ -248,4 +243,44 @@ class FirebaseServices{
       });
      return kuppiList;
     }
+
+  Future<Map<String,dynamic>> getPhotoReview(int placeId,String type) async{
+    DocumentReference doc;
+    Map<String,dynamic> data=Map();
+    List<Map<String,dynamic>> reviews=List<Map<String,dynamic>>();
+    List<int> photoIds=new List<int>();
+    Map<String,dynamic> photoAndReview=Map();
+    List<dynamic> review=new List<dynamic>();
+    if(type=="bevco"){
+      doc=firestore.collection("kerala_bevco").document('kerala_bevco_'+placeId.toString());
+    }else if(type=='toddy'){
+      doc=firestore.collection("kerala_toddy_shop").document('kerala_toddy_'+placeId.toString());
+    }
+      await doc.get().then((document){
+        if(document.exists){
+          data=document.data;
+          if(data.containsKey(type+'_photo_ids')){
+              photoIds=data[type+'_photo_ids'].cast<int>();
+            }
+            if(type=='bevco'){
+              if(data.containsKey('reviews')){
+                review=data['reviews'];
+              }
+            }else if(type=='toddy'){
+              if(data.containsKey('toddy_reviews')){
+                review=data['toddy_reviews'];
+              }
+            }
+            if(review!=null){
+              for(int i=0;i<review.length;i++){
+                Map<String,dynamic> rev= Map<String, dynamic>.from(review[i]);
+                  reviews.add(rev);
+              }
+            }
+        }
+      });
+    photoAndReview['reviews']=reviews;
+    photoAndReview['photos']=photoIds;
+    return photoAndReview;
+  }
 }

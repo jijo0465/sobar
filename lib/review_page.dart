@@ -174,9 +174,9 @@ class _ReviewPage extends State<ReviewPage>{
       builder: (BuildContext context){
         return AlertDialog(
           backgroundColor: Colors.orange[100],
-          title: Text("Thank You!"),
+          title: Text("Success"),
           content: Container(
-            child: Text("Your feedback submitted Successfully!"),
+            child: Text("Your review will be verified and avilable soon!"),
           ),
           actions: <Widget>[
             FlatButton(child: Text("Cancel"), onPressed: () {

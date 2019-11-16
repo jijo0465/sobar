@@ -33,7 +33,6 @@ class ReviewList extends StatelessWidget{
                       flex: 15,
                       child: Container(
                       padding: EdgeInsets.fromLTRB(12, 0, 0, 0),
-                      height: 50,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,

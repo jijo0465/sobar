@@ -1,7 +1,6 @@
+import 'package:firebase_admob/firebase_admob.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:kudians/profile_page.dart';
-import 'package:kudians/sobar_form_field.dart';
 import 'package:pin_code_text_field/pin_code_text_field.dart';
 class PhoneSignInPage extends StatefulWidget {
   @override
@@ -16,9 +15,29 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
   String _verificationId;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool isVerified=false;
+  BannerAd bannerAd;
+    BannerAd buildBannerAd(){
+      return BannerAd(
+        adUnitId: BannerAd.testAdUnitId,
+        size: AdSize.banner,
+        listener: (MobileAdEvent event){
+        }
+      );
+    }
+@override
+  void initState() {
+    bannerAd = buildBannerAd()..load();
+    super.initState();
+  }
 
   @override
+  void dispose() {
+    bannerAd?.dispose();
+    super.dispose();
+  }
+  @override
   Widget build(BuildContext context) {
+    bannerAd..load()..show();
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
@@ -57,21 +76,21 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
                   child: Column(
                     children: <Widget>[
                       
-                      PinCodeTextField(
-                    autofocus: true,
-                    controller: _smsController,
-                    hideCharacter: false,
-                    highlight: true,
-                    highlightColor: Colors.blue,
-                    defaultBorderColor: Colors.black,
-                    hasTextBorderColor: Colors.deepOrange,
-                    maxLength: 6,
-                    onDone: (text){
-                      print("DONE $text");
-                    },
+                    PinCodeTextField(
+                      autofocus: true,
+                      controller: _smsController,
+                      hideCharacter: false,
+                      highlight: true,
+                      highlightColor: Colors.white,
+                      defaultBorderColor: Colors.black,
+                      hasTextBorderColor: Colors.deepOrange,
+                      maxLength: 6,
+                      onDone: (text){
+                        
+                      },
                     pinCodeTextFieldLayoutType: PinCodeTextFieldLayoutType.AUTO_ADJUST_WIDTH,
                     pinBoxDecoration: ProvidedPinBoxDecoration.underlinedPinBoxDecoration,
-                    pinTextStyle: TextStyle(fontSize: 25.0,color: Colors.grey),
+                    pinTextStyle: TextStyle(fontSize: 25.0,color: Colors.white),
                     pinTextAnimatedSwitcherTransition: ProvidedPinBoxTextAnimation.scalingTransition,
                     pinTextAnimatedSwitcherDuration: Duration(milliseconds: 150),
                     pinBoxWidth: 50,
@@ -79,23 +98,32 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
                     wrapAlignment: WrapAlignment.end,
                     
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      RaisedButton(
-                        child: Text("Verify"), onPressed: () {
-                          _signInWithPhoneNumber();
-                        },
-                      ),
-                      FlatButton(
-                        child: Text("Cancel"),
-                        onPressed: (){
-                          setState(() {
-                           isVerified=false; 
-                          });
-                        },
-                      )
-                    ],
+                  Container(
+                    margin: EdgeInsets.only(top: 30),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        RaisedButton(
+                          elevation: 6,
+                          color: Colors.deepOrange,
+                          textColor: Colors.white,
+                          child: Text("Verify",style: TextStyle(letterSpacing: 0.3  ),), onPressed: () {
+                            _signInWithPhoneNumber();
+                          },
+                        ),
+                        FlatButton(
+                          child: Text("Cancel", style: TextStyle(
+                            letterSpacing: 0.3,
+                            color: Colors.white
+                          ),),
+                          onPressed: (){
+                            setState(() {
+                             isVerified=false; 
+                            });
+                          },
+                        )
+                      ],
+                    ),
                   )
                     ],
                   ),
@@ -108,23 +136,19 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
                       Expanded(
                         flex: 2,
                         child:Container(
-                          // color: Colors.blue,
                           child: TextFormField(
                             textAlign: TextAlign.center,
-                            
                           style: TextStyle(
-                            color: Colors.orange[700],
+                            color: Colors.deepOrange[400],
                             fontSize: 25,
                             letterSpacing: 5
                             ),
                           readOnly: true,
                           initialValue: '+91',
                           decoration: InputDecoration(
-                            
                             border: InputBorder.none,
                             helperText: "  ",
                           ),
-                          
                       ),
                         ),
                       ),
@@ -158,7 +182,7 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
                             helperText: "Login with your phone",
                             contentPadding: EdgeInsets.all(0),
                             helperStyle: TextStyle(
-                              color: Colors.orange[200]
+                              color: Colors.white.withOpacity(0.8)
                             )
                           ),
                           cursorColor: Colors.deepOrange,
@@ -173,13 +197,14 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
                 ),
                   ),
                 Container(
-                  margin: EdgeInsets.only(top: 8),
+                  width: MediaQuery.of(context).size.width*0.5,
+                  margin: EdgeInsets.only(top: 12),
                 child: RaisedButton(
-                  elevation: 6,
-                  hoverElevation: 10,
+
+                  elevation: 10,
                   hoverColor: Colors.black12,
-                  color: Colors.black54,
-                  child: Text("Login",style: TextStyle(color:Colors.white,)),
+                  color: Colors.black,
+                  child: Text("Login",style: TextStyle(color:Colors.white,letterSpacing: 0.3)),
                   onPressed: (){
                     if(_formKey.currentState.validate()){
                       _verifyPhoneNumber();
@@ -202,7 +227,6 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
     // });
     final PhoneVerificationCompleted verificationCompleted =
         (AuthCredential phoneAuthCredential) {
-          print('Verification Completed');
       _auth.signInWithCredential(phoneAuthCredential);
       // setState(() {
       //   _message = 'Received phone auth credential: $phoneAuthCredential';
@@ -212,7 +236,6 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
 
     final PhoneVerificationFailed verificationFailed =
         (AuthException authException) {
-          print(authException.message);
       // setState(() {
       //   _message =
       //       'Phone number verification failed. Code: ${authException.code}. Message: ${authException.message}';
