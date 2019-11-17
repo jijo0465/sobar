@@ -32,7 +32,6 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
   final String title;
-
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
@@ -83,7 +82,6 @@ class _MyHomePageState extends State<MyHomePage> {
       onResume: (Map<String,dynamic> message)async{
         Scaffold.of(context).showSnackBar(messageSnackBar(message));
       },
-      
     );
     _messaging.subscribeToTopic('holiday');
     super.initState();
@@ -108,17 +106,18 @@ class _MyHomePageState extends State<MyHomePage> {
                   ],
               )
             ),
-        child: Stack(children: <Widget>[
-          Center(child: _bottom_nav_options.elementAt(bottomNavSelected)),
-          bottomNavigationar()
-          // Container(
-          //   height:300,
-          //   width: 100,
-          //   margin: EdgeInsets.fromLTRB(12, 45, 0, 0),
-          //   alignment: Alignment.topLeft,
-          //   child: Image.asset("assets/sobar_logo.png")
-          // )
-        ],),
+        child: Stack(
+          children: <Widget>[
+            Center(child: _bottom_nav_options.elementAt(bottomNavSelected)),
+            bottomNavigationar()
+            // Container(
+            //   height:300,
+            //   width: 100,
+            //   margin: EdgeInsets.fromLTRB(12, 45, 0, 0),
+            //   alignment: Alignment.topLeft,
+            //   child: Image.asset("assets/sobar_logo.png")
+            // )
+          ],),
       ):Center(child: Container(
         child: CupertinoActivityIndicator(animating: true,)
         )),
@@ -172,51 +171,50 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         )),
       elevation: 9,
-      
     );
   }
 
   Widget bottomNavigationar(){
     return Container(
-              alignment: Alignment.bottomCenter,
-              padding: EdgeInsets.all(8),
-              child: ClipRRect(
-                borderRadius: BorderRadius.all(
-                    Radius.circular(10)
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                      child: CupertinoTabBar(
-                        iconSize: 26,
-                      items: [BottomNavigationBarItem(
-                    icon: Icon(Icons.map),
-                    title: Text("Map",style: TextStyle(letterSpacing: 1)),
-                    ),
-                    BottomNavigationBarItem( 
-                      icon: Icon(Icons.monetization_on),
-                      title: Text("Price",style: TextStyle(letterSpacing: 1))
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.calendar_today),
-                      title: Text("Holidays",style: TextStyle(letterSpacing: 1))
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.supervised_user_circle),
-                      title: Text("Profile",style: TextStyle(letterSpacing: 1),)
-                    )],
-                  backgroundColor: Colors.white10,
-                  activeColor: Colors.orange[800],
-                  inactiveColor: Colors.white,
-                  currentIndex: bottomNavSelected,
-                  onTap: ((index){
-                        if(index!=0){
-                          BarMap.closeBottomSheet();
-                        }
-                        setState(() {
-                          bottomNavSelected=index;
-                        });
-                  }),
-                ),
+        alignment: Alignment.bottomCenter,
+        padding: EdgeInsets.all(8),
+        child: ClipRRect(
+          borderRadius: BorderRadius.all(
+              Radius.circular(10)
+            ),
+            clipBehavior: Clip.antiAlias,
+                child: CupertinoTabBar(
+                  iconSize: 22,
+                items: [BottomNavigationBarItem(
+              icon: Icon(Icons.map),
+              title: Text("Map",style: TextStyle(letterSpacing: 1)),
               ),
-            );
+              BottomNavigationBarItem( 
+                icon: Icon(Icons.monetization_on),
+                title: Text("Price",style: TextStyle(letterSpacing: 1))
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.calendar_today),
+                title: Text("Holidays",style: TextStyle(letterSpacing: 1))
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.supervised_user_circle),
+                title: Text("Profile",style: TextStyle(letterSpacing: 1),)
+              )],
+            backgroundColor: Colors.white10,
+            activeColor: Colors.deepOrange,
+            inactiveColor: Colors.white,
+            currentIndex: bottomNavSelected,
+            onTap: ((index){
+              if(index!=0){
+                BarMap.closeBottomSheet();
+              }
+              setState(() {
+                bottomNavSelected=index;
+              });
+            }),
+          ),
+        ),
+      );
   }
 }

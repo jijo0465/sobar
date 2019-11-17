@@ -73,8 +73,7 @@ class _ReviewPage extends State<ReviewPage>{
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
-                              UserCache().isCached()?
-                              BottomSheetTitle(title:UserCache().getUser().sobarName):BottomSheetTitle(title:"Anonymous"),
+                              BottomSheetTitle(title:UserCache().getUser().sobarName),
                               BottomSheetText(text:"Posting Publicly")
                             ],
                           ),

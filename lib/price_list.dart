@@ -1,5 +1,4 @@
 import 'dart:ui';
-
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/material.dart';
 import 'package:kudians/app_id.dart';

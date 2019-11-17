@@ -1,8 +1,13 @@
+import 'dart:ui';
+
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kudians/bottom_sheet_address_phone.dart';
 import 'package:kudians/bottom_sheet_header.dart';
+import 'package:kudians/editor_page.dart';
+import 'package:kudians/phone_signin_page.dart';
+import 'package:kudians/user_cache.dart';
 import 'package:marquee/marquee.dart';
 import 'package:kudians/map_cache.dart';
 import 'package:kudians/place_data.dart';
@@ -177,28 +182,35 @@ class _BarMap extends State<BarMap>{
                   zoom: 8.0,
                 ))),
                   Positioned(
-                  bottom: 0.15*MediaQuery.of(context).size.height,
+                  bottom: 0.145*MediaQuery.of(context).size.height,
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(6),
-                      color: Colors.white.withOpacity(0.08),
+                      color: Colors.deepOrange[200].withOpacity(0.1),
                     ),
                     alignment: Alignment.center,
                     width: 0.72*MediaQuery.of(context).size.width,
                     height: 30,
-                    child: Marquee(
-                      text: 'Alcohol Consumption is injurious to health',
-                      style: TextStyle(fontWeight: FontWeight.bold,color: Colors.red[700]),
-                      scrollAxis: Axis.horizontal,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      blankSpace: 40.0,
-                      velocity: 100.0,
-                      pauseAfterRound: Duration(seconds: 1),
-                      startPadding: 20.0,
-                      accelerationDuration: Duration(seconds: 1),
-                      accelerationCurve: Curves.linear,
-                      decelerationDuration: Duration(milliseconds: 500),
-                      decelerationCurve: Curves.easeOut,
+                    child: ClipRRect(
+                      clipBehavior: Clip.antiAlias,
+                      borderRadius: BorderRadius.all(Radius.circular(6)),
+                        child: BackdropFilter (
+                        filter: ImageFilter.blur(sigmaX: 7.0, sigmaY: 7.0),
+                          child: Marquee(
+                          text: 'Alcohol Consumption is injurious to health',
+                          style: TextStyle(fontWeight: FontWeight.bold,color: Colors.red[700]),
+                          scrollAxis: Axis.horizontal,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          blankSpace: 40.0,
+                          velocity: 100.0,
+                          pauseAfterRound: Duration(seconds: 1),
+                          startPadding: 20.0,
+                          accelerationDuration: Duration(seconds: 1),
+                          accelerationCurve: Curves.linear,
+                          decelerationDuration: Duration(milliseconds: 500),
+                          decelerationCurve: Curves.easeOut,
+                        ),
+                      ),
                     )
                   ),
                 ),
@@ -231,6 +243,37 @@ class _BarMap extends State<BarMap>{
                           });
                         }),
                       ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: MediaQuery.of(context).size.height*0.13,
+                  right: MediaQuery.of(context).size.width*0.05,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.all(Radius.circular(100)),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 4.0, sigmaY: 4.0),
+                      child: Container(
+                        child: FloatingActionButton(
+                          hoverElevation: 25,
+                          splashColor: Colors.deepOrange,
+                          elevation: 15,
+                          backgroundColor: Colors.deepOrange[200].withOpacity(0.13),
+                          foregroundColor: Colors.deepOrange,
+                          child: Icon(Icons.add_location,size: 30,),
+                          onPressed: ()async{
+                            if(!UserCache().isCached()){
+                              await Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context){
+                                return PhoneSignInPage();
+                              
+                              }));
+                            }if(UserCache().isCached()){
+                              PlaceData pd=PlaceData(0,_center,'','',0.0,0,'','');
+                              await Navigator.of(context).push(MaterialPageRoute(builder: (context) => EditorPage(placeData: pd,type: filterChoice)));
+                            }
+                          },
+                        ),
+                    ),
                     ),
                   ),
                 )

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:kudians/bottom_sheet_text.dart';
@@ -16,23 +17,24 @@ class BottomSheetHeader extends StatelessWidget{
   Widget build(BuildContext context) {
     return Container(
       // margin: EdgeInsets.fromLTRB(12, 12, 0, 12),
-      padding: EdgeInsets.fromLTRB(12, 12, 0, 8),
+      padding: EdgeInsets.fromLTRB(12, 0, 0, 8),
       color: Colors.orange[300],
       child: AnimatedCrossFade(
           firstChild: Container(
             child: Column(
               children: <Widget>[
                 Container(
-                  child: Icon(Icons.arrow_drop_up)),
-                BottomSheetTitle(title:title),
-                Rating(rating:rating,totalRated: totalRated),
-                BottomSheetText(text:type),
-              ],
+                  child: Icon(CupertinoIcons.ellipsis)),
+                    BottomSheetTitle(title:title),
+                    Rating(rating:rating,totalRated: totalRated),
+                    BottomSheetText(text:type),
+                  ],
             ),
           ),
           secondChild:Container(child: Column(
             children: <Widget>[
-              Icon(Icons.arrow_drop_down),
+              Container(
+                child: Icon(CupertinoIcons.ellipsis)),
               BottomSheetTitle(title:title),
             ],
           )),

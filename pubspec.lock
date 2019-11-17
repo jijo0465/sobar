@@ -304,7 +304,7 @@ packages:
       name: meta
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.1.7"
+    version: "1.1.8"
   multi_image_picker:
     dependency: "direct main"
     description:

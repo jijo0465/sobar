@@ -1,6 +1,9 @@
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:kudians/firebase_services.dart';
+import 'package:kudians/user_cache.dart';
+import 'package:kudians/users.dart';
 import 'package:pin_code_text_field/pin_code_text_field.dart';
 class PhoneSignInPage extends StatefulWidget {
   @override
@@ -273,11 +276,21 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
     final FirebaseUser currentUser = await _auth.currentUser();
     assert(user.uid == currentUser.uid);
       if (user != null) {
-        // ProfilePage.isLogged=true;
-        _message = 'Successfully signed in, uid: ' + user.uid;
+        
+        await setUser(user.uid);
+        // _message = 'Successfully signed in, uid: ' + user.uid;
         Navigator.pop(context,user.uid);
       } else {
         _message = 'Sign in failed';
       }
   }
+  Future<void> setUser(String uid) async {
+    SobarUsers sobarUser;
+          await FirebaseServices().getSobarUser(uid).then((value){
+            sobarUser=value;
+        });
+        if(sobarUser!=null){
+          UserCache().setUser(sobarUser);
+          }
+    }
 }

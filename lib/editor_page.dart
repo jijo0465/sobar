@@ -30,6 +30,8 @@ class _EditorPage extends State<EditorPage>{
   LatLng currentLocation;
   ScrollController _scrollController;
   String type;
+  bool isNewPlace;
+  String title;
   @override
   void initState() {
     super.initState();
@@ -41,6 +43,17 @@ class _EditorPage extends State<EditorPage>{
     newLocation=widget.placeData.placeLocation;
     placeId=widget.placeData.placeId;
     newPhone=widget.placeData.placePhone;
+    if(placeId==0){
+      setState(() {
+        isNewPlace=true;
+        title="New Place";
+      });
+    }else{
+      setState(() {
+        isNewPlace=false;
+        title=widget.placeData.placeName;
+      });
+    }
   }
   @override
   Widget build(BuildContext context) {
@@ -50,11 +63,11 @@ class _EditorPage extends State<EditorPage>{
       resizeToAvoidBottomPadding: true,
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        title: Text(widget.placeData.placeName),
+        title: Text(title),
         backgroundColor: Colors.orange[300],
       ),
       backgroundColor: Colors.orange[200],
-      body: Container(
+      body: isNewPlace!=null? Container(
         child:SingleChildScrollView(
           controller: _scrollController,
           child: Column(
@@ -93,12 +106,41 @@ class _EditorPage extends State<EditorPage>{
               padding: EdgeInsets.fromLTRB(0, 4, 4, 12),
               // alignment: Alignment.centerRight,
               width: MediaQuery.of(context).size.width,
-              child: Text("Position the dropped pin to the correct location"),
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8),
+                child: Text("Position the dropped pin to the correct location"),
+              ),
             ),
             Container(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
+                  isNewPlace?Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      Radio(
+                        activeColor: Colors.deepOrange,
+                        onChanged:(value){
+                          setState(() {
+                            type=value;
+                          });
+                        },
+                        value: 'bevco',
+                        groupValue: type,),
+                        Text('Bevco'),
+                        SizedBox(width: 50,),
+                        Radio(
+                          activeColor: Colors.deepOrange,
+                          onChanged:(value){
+                            setState(() {
+                              type=value;
+                            });
+                          },
+                        value: 'toddy',
+                        groupValue: type,),
+                        Text('Toddy')
+                    ],
+                  ):Container(),
                   SobarFormField(label: "Name",initialValue: widget.placeData.placeName,maxLines: 1,onChanged: (name){
                     newName=name;
                   }, enabled: true,),
@@ -114,7 +156,7 @@ class _EditorPage extends State<EditorPage>{
                       color: Colors.orange[100],
                       borderRadius: BorderRadius.circular(8)
                     ),
-                    child: ListTile(
+                    child: !isNewPlace? ListTile(
                       onTap: (){
                         setState(() {
                          isClosed=!isClosed; 
@@ -130,7 +172,7 @@ class _EditorPage extends State<EditorPage>{
                           });
                         },
                       ),
-                    ),
+                    ):Container(),
                   ),
                   Container(
                     margin: EdgeInsets.fromLTRB(4, 8, 4, 4),
@@ -154,6 +196,10 @@ class _EditorPage extends State<EditorPage>{
           ],
         ),
         )
+      ):Center(
+        child: Container(
+          child: CupertinoActivityIndicator(animating: true,),
+        ),
       ),
     );
   }

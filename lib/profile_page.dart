@@ -35,21 +35,15 @@ class _ProfilePage extends State<ProfilePage>{
   @override
   void initState() {
     if(UserCache().isCached()){
+      sobarUser=UserCache().getUser();
       setState(() {
         isLogged=true;
-        sobarUser=UserCache().getUser();
       });
       firstName=sobarUser.firstName;
       lastName=sobarUser.lastName;
       sobarName=sobarUser.sobarName;
       phone=sobarUser.phoneNumber;
       photoUrl=sobarUser.photoUrl;
-    }else{
-      FirebaseAuth.instance.currentUser().then((value){
-        if(value!=null){
-          setUser(value.uid);
-        }
-      });
     }
     textEditingController=TextEditingController();
     super.initState();
@@ -149,13 +143,15 @@ class _ProfilePage extends State<ProfilePage>{
                         fontSize: 20,
                       ),),
                       onPressed: () async {
-                        String userId=await Navigator.of(context).push(MaterialPageRoute(
+                        await Navigator.of(context).push(MaterialPageRoute(
                           builder: (BuildContext context){
                             return PhoneSignInPage();
                           }
                         ));
-                        if(userId!=null){
-                          setUser(userId);
+                        if(UserCache().isCached()){
+                            setState(() {
+                              isLogged=true;
+                            });
                           }
                       },
                     ),
@@ -199,17 +195,17 @@ class _ProfilePage extends State<ProfilePage>{
       ],
     );
    }
-    Future<void> setUser(String uid) async {
-          await FirebaseServices().getSobarUser(uid).then((value){
-            sobarUser=value;
-        });
-        if(sobarUser!=null){
-          UserCache().setUser(sobarUser);
-          setState(() {
-                isLogged=true;
-              });
-          }
-    }
+    // Future<void> setUser(String uid) async {
+    //       await FirebaseServices().getSobarUser(uid).then((value){
+    //         sobarUser=value;
+    //     });
+    //     if(sobarUser!=null){
+    //       UserCache().setUser(sobarUser);
+    //       setState(() {
+    //             isLogged=true;
+    //           });
+    //       }
+    // }
       
       void updateProfile() async {
         final success = SnackBar(content: Text('Saved Successfully!'), action: SnackBarAction(label: "OK",onPressed: (){},),);

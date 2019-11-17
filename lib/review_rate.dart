@@ -1,7 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:kudians/phone_signin_page.dart';
 import 'package:kudians/review_page.dart';
+import 'package:kudians/user_cache.dart';
 
 class ReviewRate extends StatelessWidget{
   final String placeName;
@@ -33,8 +36,15 @@ class ReviewRate extends StatelessWidget{
               Icons.star,
               color: Colors.deepOrange,
             ),
-            onRatingUpdate: (rating) {
-              Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context){
+            onRatingUpdate: (rating) async {
+              
+              if(!UserCache().isCached()){
+                await Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context){
+                  return PhoneSignInPage();
+              }));
+              }
+              if(UserCache().isCached()){
+                Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context){
                 return ReviewPage(
                   placeId: placeId,
                   placeName: placeName,
@@ -42,6 +52,7 @@ class ReviewRate extends StatelessWidget{
                   placeType: placeType,
                 );
               }));
+              }
             }
               
     ),
