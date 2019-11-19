@@ -54,6 +54,7 @@ dependencies:
   firebase_admob: ^0.9.0+9
   permission_handler: ^4.0.0
   sqflite: ^1.1.7+2
+  timeago: ^2.0.22
 
 dev_dependencies:
   flutter_test:
@@ -62,10 +63,13 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/bar_marker.png
     - assets/sobar_logo.png
     - assets/user.png
     - assets/map_style.json
     - assets/toddy_marker.png
     - assets/bevco_marker.png
     - assets/sobar_db.db
+  fonts:
+    - family:  MyFlutterApp
+      fonts:
+       - asset: assets/fonts/MyFlutterApp.ttf

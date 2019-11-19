@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -132,32 +133,7 @@ class FirebaseServices{
     });
   }
 
-  void addReview(ReviewData reviewData) async{
-    String collection;
-    if(reviewData.type=='bevco'){
-      collection='kerala_bevco';
-    }else if (reviewData.type=='toddy'){
-      collection='kerala_toddy_shop';
-    }
-    String document="kerala_"+reviewData.type+"_"+reviewData.placeId.toString();
-    DocumentReference documentReference=firestore.collection(collection).document(document);
-    var storageImageRef=FirebaseStorage.instance.ref().child('sobar_'+reviewData.type);
-    reviewData.photoRefs=List<String>();
-    reviewData.photos.forEach((f) async {
-      var uuid = Uuid();
-      String photoRef=uuid.v1();
-      final StorageReference _ref = storageImageRef.child(photoRef);
-      _ref.putFile(File(f));
-      reviewData.photoRefs.add(photoRef);
-    });
-    documentReference.get().then((doc){
-      if(doc.exists){
-        documentReference.updateData({'sobar_reviews':FieldValue.arrayUnion(reviewData.toMapList())});
-      }else{
-        documentReference.setData({'sobar_reviews':FieldValue.arrayUnion(reviewData.toMapList())});
-      }
-    });
-  }
+
   Future<SobarUsers> updateProfile(SobarUsers sobarUser)async{
     String collection="sobar_users";
     String document=sobarUser.userId;
@@ -189,18 +165,21 @@ class FirebaseServices{
   }
 
   Future<SobarUsers> getSobarUser(String uid)async{
-    SobarUsers sobarUsers=SobarUsers(uid);
-    FirebaseUser user= await FirebaseAuth.instance.currentUser();
+    SobarUsers sobarUsers;
+    // FirebaseUser user= await FirebaseAuth.instance.currentUser();
     DocumentReference documentReference=firestore.collection('sobar_users').document(uid);
     await documentReference.get().then((doc) {
-      if(!doc.exists){
-        documentReference.setData({'user_id':uid,'phone_number':user.phoneNumber});
+      // if(!doc.exists){
+      //   documentReference.setData({'user_id':uid,'phone_number':user.phoneNumber});
+      // }
+      if(doc.exists){
+        sobarUsers=SobarUsers(uid);
+        sobarUsers.firstName=doc.data['first_name']==null?'':doc.data['first_name'];
+        sobarUsers.lastName=doc.data['last_name']==null?'':doc.data['last_name'];
+        sobarUsers.sobarName=doc.data['sobar_name']==null?'':doc.data['sobar_name'];
+        sobarUsers.phoneNumber=doc.data['phone_number']==null?'':doc.data['phone_number'];
+        sobarUsers.photoUrl=doc.data['photo_url']==null?'':doc.data['photo_url'];
       }
-      sobarUsers.firstName=doc.data['first_name']==null?'':doc.data['first_name'];
-      sobarUsers.lastName=doc.data['last_name']==null?'':doc.data['last_name'];
-      sobarUsers.sobarName=doc.data['sobar_name']==null?'':doc.data['sobar_name'];
-      sobarUsers.phoneNumber=doc.data['phone_number']==null?'':doc.data['phone_number'];
-      sobarUsers.photoUrl=doc.data['photo_url']==null?'':doc.data['photo_url'];
     });
     return sobarUsers;
   }
@@ -248,9 +227,11 @@ class FirebaseServices{
     DocumentReference doc;
     Map<String,dynamic> data=Map();
     List<Map<String,dynamic>> reviews=List<Map<String,dynamic>>();
+    List<Map<String,dynamic>> sobarReviews=List<Map<String,dynamic>>();
     List<int> photoIds=new List<int>();
     Map<String,dynamic> photoAndReview=Map();
     List<dynamic> review=new List<dynamic>();
+    List<dynamic> sobarReview=new List<dynamic>();
     if(type=="bevco"){
       doc=firestore.collection("kerala_bevco").document('kerala_bevco_'+placeId.toString());
     }else if(type=='toddy'){
@@ -266,21 +247,70 @@ class FirebaseServices{
               if(data.containsKey('reviews')){
                 review=data['reviews'];
               }
+              
             }else if(type=='toddy'){
               if(data.containsKey('toddy_reviews')){
                 review=data['toddy_reviews'];
               }
             }
-            if(review!=null){
+            if(data.containsKey('sobar_reviews')){
+                sobarReview=data['sobar_reviews'];
+              }
+            if(review.isNotEmpty){
               for(int i=0;i<review.length;i++){
                 Map<String,dynamic> rev= Map<String, dynamic>.from(review[i]);
                   reviews.add(rev);
+              }
+            }
+            if(sobarReview.isNotEmpty){
+              for(int i=0;i<sobarReview.length;i++){
+                Map<String,dynamic> rev= Map<String, dynamic>.from(sobarReview[i]);
+                  sobarReviews.add(rev);
               }
             }
         }
       });
     photoAndReview['reviews']=reviews;
     photoAndReview['photos']=photoIds;
+    photoAndReview['sobar_reviews']=sobarReviews;
     return photoAndReview;
   }
+  void addReview(ReviewData reviewData) async{
+    String collection;
+    if(reviewData.type=='bevco'){
+      collection='kerala_bevco';
+    }else if (reviewData.type=='toddy'){
+      collection='kerala_toddy_shop';
+    }
+    String document="kerala_"+reviewData.type+"_"+reviewData.placeId.toString();
+    DocumentReference documentReference=firestore.collection(collection).document(document);
+    var storageImageRef=FirebaseStorage.instance.ref().child('sobar_'+reviewData.type);
+    reviewData.photoRefs=List<String>();
+    reviewData.photos.forEach((f) async {
+      var uuid = Uuid();
+      String photoRef=uuid.v1();
+      final StorageReference _ref = storageImageRef.child(photoRef);
+      _ref.putFile(File(f));
+      reviewData.photoRefs.add(photoRef);
+    });
+    documentReference.get().then((doc){
+      if(doc.exists){
+        documentReference.updateData({'sobar_reviews':FieldValue.arrayUnion(reviewData.toMapList())});
+      }else{
+        documentReference.setData({'sobar_reviews':FieldValue.arrayUnion(reviewData.toMapList())});
+      }
+    });
+  }
+
+  Future<void> setSobarUser(SobarUsers sobarUser) async {
+    DocumentReference doc;
+    doc=firestore.collection("sobar_users").document(sobarUser.userId);
+    await doc.get().then((document){
+      if(!document.exists){
+        doc.setData({'user_id':sobarUser.userId,'phone_number':sobarUser.phoneNumber,'sobar_name':sobarUser.sobarName});
+      }else{
+        doc.updateData({'sobar_name':sobarUser.sobarName});
+      }
+    });
+  }  
 }

@@ -14,6 +14,7 @@ import 'calender_page.dart';
 import 'package:kudians/users.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:kudians/sqlite_db.dart';
+import 'my_flutter_app_icons.dart';
 
 void main() => runApp(MyApp());
 
@@ -166,7 +167,7 @@ class _MyHomePageState extends State<MyHomePage> {
       content: Container(
         child: Row(
           children: <Widget>[
-            Text("Tomorrow will be a bar Holiday!!",style: TextStyle(fontSize: 14),),
+            Text("Tomorrow will be a DRY Day!!",style: TextStyle(fontSize: 14),),
             Text(message.notification['title'],style: TextStyle(fontSize: 8))
           ],
         )),
@@ -186,19 +187,19 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: CupertinoTabBar(
                   iconSize: 22,
                 items: [BottomNavigationBarItem(
-              icon: Icon(Icons.map),
+              icon: Icon(MyFlutterApp.maps_and_flags),
               title: Text("Map",style: TextStyle(letterSpacing: 1)),
               ),
               BottomNavigationBarItem( 
-                icon: Icon(Icons.monetization_on),
+                icon: Icon(MyFlutterApp.price_list3),
                 title: Text("Price",style: TextStyle(letterSpacing: 1))
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.calendar_today),
-                title: Text("Holidays",style: TextStyle(letterSpacing: 1))
+                icon: Icon(MyFlutterApp.no_alcohol_1),
+                title: Text("DRY Days",style: TextStyle(letterSpacing: 1))
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.supervised_user_circle),
+                icon: Icon(MyFlutterApp.user_1),
                 title: Text("Profile",style: TextStyle(letterSpacing: 1),)
               )],
             backgroundColor: Colors.white10,
@@ -206,9 +207,6 @@ class _MyHomePageState extends State<MyHomePage> {
             inactiveColor: Colors.white,
             currentIndex: bottomNavSelected,
             onTap: ((index){
-              if(index!=0){
-                BarMap.closeBottomSheet();
-              }
               setState(() {
                 bottomNavSelected=index;
               });

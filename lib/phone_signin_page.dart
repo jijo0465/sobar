@@ -1,7 +1,9 @@
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kudians/firebase_services.dart';
+import 'package:kudians/my_flutter_app_icons.dart';
 import 'package:kudians/user_cache.dart';
 import 'package:kudians/users.dart';
 import 'package:pin_code_text_field/pin_code_text_field.dart';
@@ -13,10 +15,21 @@ class PhoneSignInPage extends StatefulWidget {
 class _PhoneSignInSectionState extends State<PhoneSignInPage> {
   final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _smsController = TextEditingController();
+  final TextEditingController _sobarNameController = TextEditingController();
 final FirebaseAuth _auth = FirebaseAuth.instance;
   String _message = '';
+  bool isPreviouslyLogged=false;
+  String phone='';
+  String sobarName='';
+  String errorMessage='';
   String _verificationId;
+  bool isSobarNameSet=false;
+  SobarUsers sobarUser;
+  FirebaseUser firebaseUser;
+  bool isLogged=false;
+  BuildContext context;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _sobarNameFormKey = GlobalKey<FormState>();
   bool isVerified=false;
   BannerAd bannerAd;
     BannerAd buildBannerAd(){
@@ -40,46 +53,47 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
   }
   @override
   Widget build(BuildContext context) {
+    context=context;
+    print("BUILD Called");
     bannerAd..load()..show();
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
+    return WillPopScope(
+          child: Scaffold(
+        resizeToAvoidBottomPadding: false,
+        resizeToAvoidBottomInset: false,
         backgroundColor: Colors.transparent,
-        bottomOpacity: 0.0,
-        iconTheme: IconThemeData(color: Colors.orange[900]),
-        title: Text('Sobar Sign In',style: TextStyle(
-          color: Colors.orange[900]
-        ),),
-        
-      ),
-    body:Container(
-      height: MediaQuery.of(context).size.height,
-      decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topRight,
-                end: Alignment.bottomLeft,
-                stops: [0.1,0.3, 0.5, 0.7,0.8, 0.9], 
-                colors: <Color>[
-                  Colors.black,
-                  Colors.grey[900],
-                  Colors.grey[800],
-                  Colors.grey[700],
-                  Colors.grey[600],
-                  Colors.grey[500],
-                  ],
-              )
-            ),
-      child: SingleChildScrollView(
-        
-        child: Center(
-          heightFactor: 3.6,
-          child: Container(
-                margin: EdgeInsets.fromLTRB(12, 12, 12, 12),
-                child: isVerified?Container(
-                  child: Column(
-                    children: <Widget>[
-                      
-                    PinCodeTextField(
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          bottomOpacity: 0.0,
+          iconTheme: IconThemeData(color: Colors.orange[900]),
+          title: Text('Sobar Sign Up',style: TextStyle(
+            color: Colors.orange[900]
+          ),),
+          
+        ),
+      body:Container(
+        height: MediaQuery.of(context).size.height,
+        decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topRight,
+                  end: Alignment.bottomLeft,
+                  stops: [0.1,0.3, 0.5, 0.7,0.8, 0.9], 
+                  colors: <Color>[
+                    Colors.black,
+                    Colors.grey[900],
+                    Colors.grey[800],
+                    Colors.grey[700],
+                    Colors.grey[600],
+                    Colors.grey[500],
+                    ],
+                )
+              ),
+        child: Container(
+              child: isVerified&&!isLogged?Container(
+                child: Column(
+                  children: <Widget>[
+                  Container(
+                    margin: EdgeInsets.only(top: MediaQuery.of(context).size.height*0.3),
+                    child: PinCodeTextField(
                       autofocus: true,
                       controller: _smsController,
                       hideCharacter: false,
@@ -100,125 +114,252 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
                     pinBoxHeight: 40,
                     wrapAlignment: WrapAlignment.end,
                     
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(top: 30),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        RaisedButton(
-                          elevation: 6,
-                          color: Colors.deepOrange,
-                          textColor: Colors.white,
-                          child: Text("Verify",style: TextStyle(letterSpacing: 0.3  ),), onPressed: () {
-                            _signInWithPhoneNumber();
-                          },
-                        ),
-                        FlatButton(
-                          child: Text("Cancel", style: TextStyle(
-                            letterSpacing: 0.3,
-                            color: Colors.white
-                          ),),
-                          onPressed: (){
-                            setState(() {
-                             isVerified=false; 
-                            });
-                          },
-                        )
-                      ],
-                    ),
-                  )
-                    ],
-                  ),
-                ):Column(children: <Widget>[
-                  
-                  Padding(
-                    padding: const EdgeInsets.only(left: 40,right: 40,),
-                    child: Row(
-                    children: <Widget>[
-                      Expanded(
-                        flex: 2,
-                        child:Container(
-                          child: TextFormField(
-                            textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.deepOrange[400],
-                            fontSize: 25,
-                            letterSpacing: 5
-                            ),
-                          readOnly: true,
-                          initialValue: '+91',
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            helperText: "  ",
-                          ),
-                      ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 8,
-                        child: Container( 
-                          margin: EdgeInsets.only(left: 18),
-                          child: Form(
-                            key: _formKey,
-                            child: TextFormField(
-                              autofocus: true,
-                              textAlign: TextAlign.left,
-                              style: TextStyle(
-                                color: Colors.orange[900],
-                                fontSize: 25,
-                                letterSpacing: 5
-                                ),
-                            validator: (value){
-                              String patttern = r'(^[0-9]{10}$)';
-                              RegExp regExp = RegExp(patttern);
-                              if (value.length == 0) {
-                                return 'Please enter mobile number';
-                              }
-                              else if (!regExp.hasMatch(value)) {
-                                return 'Please enter valid mobile number';
-                              }
-                              return null;
-                            },
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            helperText: "Login with your phone",
-                            contentPadding: EdgeInsets.all(0),
-                            helperStyle: TextStyle(
-                              color: Colors.white.withOpacity(0.8)
-                            )
-                          ),
-                          cursorColor: Colors.deepOrange,
-                          controller: _phoneNumberController,
-                          keyboardType: TextInputType.phone,
-                          maxLength: 10,
-                          maxLengthEnforced: true,
-                          
-                        ))
-                        ),
-                      )],
                 ),
                   ),
                 Container(
-                  width: MediaQuery.of(context).size.width*0.5,
-                  margin: EdgeInsets.only(top: 12),
-                child: RaisedButton(
-
-                  elevation: 10,
-                  hoverColor: Colors.black12,
-                  color: Colors.black,
-                  child: Text("Login",style: TextStyle(color:Colors.white,letterSpacing: 0.3)),
-                  onPressed: (){
-                    if(_formKey.currentState.validate()){
-                      _verifyPhoneNumber();
-                    }
-                  },
+                  margin: EdgeInsets.only(top: 30),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      RaisedButton(
+                        elevation: 6,
+                        color: Colors.deepOrange,
+                        textColor: Colors.white,
+                        child: Text("Verify",style: TextStyle(letterSpacing: 0.3  ),), onPressed: () {
+                          _signInWithPhoneNumber();
+                        },
+                      ),
+                      FlatButton(
+                        child: Text("Cancel", style: TextStyle(
+                          letterSpacing: 0.3,
+                          color: Colors.white
+                        ),),
+                        onPressed: (){
+                          setState(() {
+                           isVerified=false; 
+                          });
+                        },
+                      )
+                    ],
+                  ),
+                )
+                  ],
                 ),
-              )
-                ],) 
+              ):AnimatedCrossFade(
+                duration: const Duration(milliseconds: 210),
+                crossFadeState: isLogged ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+                firstChild: Container(
+                margin: EdgeInsets.only(top: MediaQuery.of(context).size.height*0.2,left: 16,right: 16),
+                child: Form(
+                  key: _formKey,
+                    child: Column(children: <Widget>[
+                    
+                    SizedBox(
+                      height: 12,
+                    ),
+                    Container(
+                      child: Theme(
+                        data: Theme.of(context)
+                                      .copyWith(primaryColor: Colors.deepOrange,),
+                          child: TextFormField(
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              letterSpacing: 3
+                              ),
+                          onChanged: (value){
+                            phone=value;
+                          },
+                        decoration: InputDecoration(
+                          alignLabelWithHint: true,
+                          prefixText: ' ',
+                          prefixIcon: Icon(CupertinoIcons.phone_solid),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.white30, width: 0.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.white, width: 0.0),
+                          ),
+                          errorBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.red.withOpacity(0.3), width: 0.0),
+                          ),
+                          focusedErrorBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.red.withOpacity(0.6), width: 0.0),
+                          ),
+                          labelText: 'Phone',
+                          labelStyle: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 16,
+                              letterSpacing: 3
+                              ),
+                          contentPadding: EdgeInsets.all(0),
+                          helperStyle: TextStyle(
+                            color: Colors.white.withOpacity(0.8)
+                          )
+                        ),
+                        cursorColor: Colors.deepOrange,
+                        controller: _phoneNumberController,
+                        keyboardType: TextInputType.phone,
+                        maxLength: 10,
+                        maxLengthEnforced: true,
+                        validator: (value){
+                            String patttern = r'(^[0-9]{10}$)';
+                            RegExp regExp = RegExp(patttern);
+                            if (value.length == 0) {
+                              return 'Please enter mobile number';
+                            }
+                            else if (!regExp.hasMatch(value)) {
+                              return 'Please enter valid mobile number';
+                            }
+                            return null;
+                          },
+                        
+                    ),
+                      )
+                    ),
+                  Container(
+                    width: MediaQuery.of(context).size.width*0.5,
+                    margin: EdgeInsets.only(top: 12),
+                  child: RaisedButton(
+
+                    elevation: 10,
+                    hoverColor: Colors.black12,
+                    color: Colors.black,
+                    child: Text("Login",style: TextStyle(color:Colors.white,letterSpacing: 0.3)),
+                    onPressed: (){
+                      if(_formKey.currentState.validate()){
+                        _verifyPhoneNumber();
+                      }
+                    },
+                  ),
+            )
+                  ],),
+                ),
               ),
-        )),
-    ));
+              secondChild: Container(
+                margin: EdgeInsets.only(top: MediaQuery.of(context).size.height*0.2,left: 16,right: 16),
+                child: Form(
+                  key: _sobarNameFormKey,
+                    child: Column(children: <Widget>[
+                    SizedBox(
+                      height: 12,
+                    ),
+                    Container(
+                      child: Theme(
+                        data: Theme.of(context)
+                                      .copyWith(primaryColor: Colors.deepOrange,),
+                          child: TextFormField(
+                            controller: _sobarNameController,
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              letterSpacing: 3
+                              ),
+                          onChanged: (value){
+                            phone=value;
+                          },
+                        decoration: InputDecoration(
+                          alignLabelWithHint: true,
+                          prefixText: ' ',
+                          prefixIcon: Icon(MyFlutterApp.user_1),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.white30, width: 0.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.white, width: 0.0),
+                          ),
+                          errorBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.red.withOpacity(0.3), width: 0.0),
+                          ),
+                          focusedErrorBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.red.withOpacity(0.6), width: 0.0),
+                          ),
+                          counterText: '',
+                          labelText: 'Sobar Name',
+                          labelStyle: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 16,
+                              letterSpacing: 3
+                              ),
+                          contentPadding: EdgeInsets.all(0),
+                          helperStyle: TextStyle(
+                            color: Colors.white.withOpacity(0.8)
+                          )
+                        ),
+                        cursorColor: Colors.deepOrange,
+                        keyboardType: TextInputType.phone,
+                        maxLengthEnforced: false,
+                        validator: (value){
+                            String patttern = r'(^[A-Za-z]\w*$)';
+                            RegExp regExp = RegExp(patttern);
+                            if (value.length < 3) {
+                            return 'Name must be more than 2 charater';
+                          }
+                          else if (!regExp.hasMatch(value)) {
+                            return 'Name must begin with an alphabet';
+                          }
+                          else if (value.length > 15) {
+                            return 'Name must not be more than 15 characters';
+                          }
+                            return null;
+                          },
+                        
+                    ),
+                      )
+                    ),
+                  Container(
+                    width: MediaQuery.of(context).size.width*0.5,
+                    margin: EdgeInsets.only(top: 12),
+                  child: RaisedButton(
+                    elevation: 10,
+                    hoverColor: Colors.black12,
+                    color: Colors.black,
+                    child: Text("Submit",style: TextStyle(color:Colors.white,letterSpacing: 0.3)),
+                    onPressed: () async {
+                      if(_sobarNameFormKey.currentState.validate()){
+                        sobarUser.sobarName=_sobarNameController.text;
+                        await setUser();
+                        Navigator.pop(context);
+                      }
+                    },
+                  ),
+            )
+                  ],),
+                ),
+              ),
+             )
+            ),
+      )), onWillPop: () async{
+        bool shouldPop=true;
+        if(sobarName==''&&isLogged){
+          await showDialog(
+            barrierDismissible: false,
+            context: context,
+            builder: (BuildContext context){
+              return AlertDialog(
+                title: Text('Are you Sure?'),
+                content: Text('You are one step away to be a Sobar User'),
+                actions: <Widget>[
+                  FlatButton(child: Text('Cancel'), onPressed: () {
+                    Navigator.pop(context);
+                    shouldPop= false;
+                  },),
+                  FlatButton(child: Text('Logout'), onPressed: () async {
+                    await FirebaseAuth.instance.signOut();
+                    Navigator.pop(context);
+                    shouldPop= true;
+                  },)
+                ],
+              );
+            }, 
+          );
+          
+        }
+        return Future.value(shouldPop);
+      },
+    );
   }
 
   void _verifyPhoneNumber() async {
@@ -271,26 +412,40 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
       verificationId: _verificationId,
       smsCode: _smsController.text,
     );
-    final FirebaseUser user =
+    firebaseUser =
         (await _auth.signInWithCredential(credential)).user;
     final FirebaseUser currentUser = await _auth.currentUser();
-    assert(user.uid == currentUser.uid);
-      if (user != null) {
-        
-        await setUser(user.uid);
+    assert(firebaseUser.uid == currentUser.uid);
+      if (firebaseUser != null) {
+        sobarUser=await FirebaseServices().getSobarUser(firebaseUser.uid);
+        setState(() {
+          isLogged=true;
+        });
+        if(sobarUser!=null){
+          isPreviouslyLogged=true;
+          _sobarNameController.text=sobarUser.sobarName;
+        }else{
+          isPreviouslyLogged=false;
+          sobarUser=SobarUsers(firebaseUser.uid);
+          sobarUser.phoneNumber=firebaseUser.phoneNumber;
+        }
+        // setUser(user.uid);
         // _message = 'Successfully signed in, uid: ' + user.uid;
-        Navigator.pop(context,user.uid);
+        // Navigator.pop(context,user.uid);
       } else {
         _message = 'Sign in failed';
       }
   }
-  Future<void> setUser(String uid) async {
-    SobarUsers sobarUser;
-          await FirebaseServices().getSobarUser(uid).then((value){
-            sobarUser=value;
-        });
-        if(sobarUser!=null){
-          UserCache().setUser(sobarUser);
-          }
+  Future<void> setUser() async {
+    // sobarUser=SobarUsers(firebaseUser.uid);
+    // setUser.sobarName=sobarName==''?'sobar_user_':sobarName;
+    // setUser.phoneNumber=_phoneNumberController.text;
+      await FirebaseServices().setSobarUser(sobarUser);
+      if(isPreviouslyLogged){
+        await FirebaseServices().getSobarUser(sobarUser.userId).then((value){
+          sobarUser=value;
+      });
+      }
+      UserCache().setUser(sobarUser);
     }
 }

@@ -1,5 +1,4 @@
 import 'dart:ui';
-
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +7,6 @@ import 'package:kudians/bottom_sheet_header.dart';
 import 'package:kudians/editor_page.dart';
 import 'package:kudians/phone_signin_page.dart';
 import 'package:kudians/user_cache.dart';
-import 'package:marquee/marquee.dart';
 import 'package:kudians/map_cache.dart';
 import 'package:kudians/place_data.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -24,29 +22,32 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:stopper/stopper.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 const MAP_API="AIzaSyAR6yclpjdj-1q8bwtOdvYm5JpKG7KOmCU";
 
 class BarMap extends StatefulWidget{
-  static PersistentBottomSheetController bottomSheetController;
+  // static PersistentBottomSheetController bottomSheetController;
   const BarMap();
   @override
   State<StatefulWidget> createState() {
     return _BarMap();
       }
 
-  static closeBottomSheet() async {
-    if(bottomSheetController!=null){
-      bottomSheetController.close();
-      bottomSheetController=null;
-    }
-      }
-  setBottomSheetController(controller){
-    bottomSheetController=controller;
-  }
+  // static closeBottomSheet() async {
+  //   try{
+  //     bottomSheetController.close();
+  //   }catch(e){
+  //     print("Just ignored");
+  //   }
+  //     }
+  // setBottomSheetController(controller){
+  //   bottomSheetController=controller;
+  // }
 }
         
 class _BarMap extends State<BarMap>{
+  PersistentBottomSheetController bottomSheetController;
   Geolocator _geolocator;
   Position position;
   String _mapStyle;
@@ -72,6 +73,8 @@ class _BarMap extends State<BarMap>{
   LatLng _center = LatLng(9.9312, 76.2673);
   final snackBar = SnackBar(content: Text('Please allow the location permission!'));
   PermissionStatus _status;
+  Map<String,dynamic> userReview;
+  bool isUserReviewed=false;
   @override
   void initState() {
     _geolocator=Geolocator();
@@ -92,11 +95,17 @@ class _BarMap extends State<BarMap>{
           BitmapDescriptor.fromAssetImage(
             ImageConfiguration(size: Size.fromHeight(20)), 'assets/bevco_marker.png')
             .then((onValue) {
-              barIcon = onValue;
+              setState(() {
+                barIcon = onValue;
+              });
+              
               BitmapDescriptor.fromAssetImage(
                 ImageConfiguration(size: Size(15, 15)), 'assets/toddy_marker.png')
                 .then((value) {
-                  toddyIcon = value;
+                  setState(() {
+                    toddyIcon = value;
+                  });
+                  
                   MapCache().setIcons(toddyIcon, barIcon);
             });
         });
@@ -181,41 +190,41 @@ class _BarMap extends State<BarMap>{
                   target: _center,
                   zoom: 8.0,
                 ))),
-                  Positioned(
-                  bottom: 0.145*MediaQuery.of(context).size.height,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(6),
-                      color: Colors.deepOrange[200].withOpacity(0.1),
-                    ),
-                    alignment: Alignment.center,
-                    width: 0.72*MediaQuery.of(context).size.width,
-                    height: 30,
-                    child: ClipRRect(
-                      clipBehavior: Clip.antiAlias,
-                      borderRadius: BorderRadius.all(Radius.circular(6)),
-                        child: BackdropFilter (
-                        filter: ImageFilter.blur(sigmaX: 7.0, sigmaY: 7.0),
-                          child: Marquee(
-                          text: 'Alcohol Consumption is injurious to health',
-                          style: TextStyle(fontWeight: FontWeight.bold,color: Colors.red[700]),
-                          scrollAxis: Axis.horizontal,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          blankSpace: 40.0,
-                          velocity: 100.0,
-                          pauseAfterRound: Duration(seconds: 1),
-                          startPadding: 20.0,
-                          accelerationDuration: Duration(seconds: 1),
-                          accelerationCurve: Curves.linear,
-                          decelerationDuration: Duration(milliseconds: 500),
-                          decelerationCurve: Curves.easeOut,
-                        ),
-                      ),
-                    )
-                  ),
-                ),
+                //   Positioned(
+                //   bottom: 0.145*MediaQuery.of(context).size.height,
+                //   child: Container(
+                //     decoration: BoxDecoration(
+                //       borderRadius: BorderRadius.circular(6),
+                //       color: Colors.deepOrange[200].withOpacity(0.1),
+                //     ),
+                //     alignment: Alignment.center,
+                //     width: 0.72*MediaQuery.of(context).size.width,
+                //     height: 30,
+                //     child: ClipRRect(
+                //       clipBehavior: Clip.antiAlias,
+                //       borderRadius: BorderRadius.all(Radius.circular(6)),
+                //         child: BackdropFilter (
+                //         filter: ImageFilter.blur(sigmaX: 7.0, sigmaY: 7.0),
+                //           child: Marquee(
+                //           text: 'Alcohol Consumption is injurious to health',
+                //           style: TextStyle(fontWeight: FontWeight.bold,color: Colors.red[700]),
+                //           scrollAxis: Axis.horizontal,
+                //           crossAxisAlignment: CrossAxisAlignment.center,
+                //           blankSpace: 40.0,
+                //           velocity: 100.0,
+                //           pauseAfterRound: Duration(seconds: 1),
+                //           startPadding: 20.0,
+                //           accelerationDuration: Duration(seconds: 1),
+                //           accelerationCurve: Curves.linear,
+                //           decelerationDuration: Duration(milliseconds: 500),
+                //           decelerationCurve: Curves.easeOut,
+                //         ),
+                //       ),
+                //     )
+                //   ),
+                // ),
                 Positioned(
-                  top: MediaQuery.of(context).size.height*0.096,
+                  top: MediaQuery.of(context).size.height*0.082,
                   child: Container(
                     alignment: Alignment.center,
                     child: Container(
@@ -234,7 +243,11 @@ class _BarMap extends State<BarMap>{
                         selectedColor: Colors.deepOrange,
                         groupValue: filterChoice,
                         onValueChanged: ((value){
-                          BarMap.closeBottomSheet();
+                          try{
+                              bottomSheetController.close();
+                            }catch(e){
+                              
+                            }
                           mapController.animateCamera(CameraUpdate.newCameraPosition(
                           CameraPosition(
                               target: _center, zoom: 13)));
@@ -315,13 +328,29 @@ class _BarMap extends State<BarMap>{
         String placePlaceId='';
         url=List<String>();
         List<Map<String,dynamic>> reviews=List();
+        List<Map<String,dynamic>> sobarReviews=List();
         firebaseServices.getPhotoReview(placeId,filterChoice).then((value){
-            
-            setState(() {
+          setState(() {
               reviews=value['reviews'];
             });
+          sobarReviews=value['sobar_reviews'];
+          if(sobarReviews.isNotEmpty){
+            for(int i=0;i<sobarReviews.length;i++){
+              Map<String,dynamic> rev=sobarReviews[i];
+              if(UserCache().getUser().userId==rev['author_id']){
+                userReview=rev;
+                userReview['relative_time_description']=timeago.format(DateTime.now().subtract(DateTime.now().difference(userReview['time'].toDate())));
+                reviews.insert(0, userReview);
+                setState(() {
+                  isUserReviewed=true;
+                });
+                  continue;
+              }
+              print(isUserReviewed);
+            }
+          }
+            
               for(int photoId in value['photos']){
-                print(placeId);
                 getUrl(placeId,photoId).then((value){
                   print(value);
                   url.add(value);
@@ -349,7 +378,7 @@ class _BarMap extends State<BarMap>{
             placePlaceId=place.placePlaceId;
         }
     
-        PersistentBottomSheetController bottomSheetController=showStopper(
+        bottomSheetController=showStopper(
           userCanClose: true,
           context: context,
           initialStop: 0,
@@ -380,12 +409,17 @@ class _BarMap extends State<BarMap>{
                                 SobarDivider(),
                                 urlSet?PhotoList(count: url.length,url: url,title: place.placeName, source: "network",):Container(),
                                 SuggestEdit(placeData: place,type:filterChoice),
-                                ReviewRate(placeId: place.placeId,placeName: place.placeName,placeType: filterChoice),
+                                isUserReviewed?ReviewRate(placeId: place.placeId,placeName: place.placeName,
+                                rating:  userReview['rating']*1.0,
+                                placeType: filterChoice,isUserReviewed: isUserReviewed,):
+                                ReviewRate(placeId: place.placeId,placeName: place.placeName,
+                                rating:  0.0,
+                                placeType: filterChoice,isUserReviewed: isUserReviewed,),
                                 SobarDivider(),
                               ]
                             ),
                           ),
-                          ReviewList(reviews: reviews,)
+                          isUserReviewed?ReviewList(reviews: reviews): ReviewList(reviews: reviews,)
                         ],
                         controller: scrollController,
                         physics: scrollPhysics,
@@ -398,8 +432,7 @@ class _BarMap extends State<BarMap>{
                           ),
             );
                       },
-                    );
-          widget.setBottomSheetController(bottomSheetController);        
+                    );     
       }
     
       setUserLocation()async{
@@ -431,7 +464,7 @@ class _BarMap extends State<BarMap>{
             }
             
           });
-        }else{
+        }if(_status==PermissionStatus.granted){
           setUserLocation();
         }
       }

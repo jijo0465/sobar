@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
@@ -10,8 +9,10 @@ class ReviewRate extends StatelessWidget{
   final String placeName;
   final int placeId;
   final String placeType;
+  final bool isUserReviewed;
+  final double rating;
 
-  const ReviewRate({Key key, @required this.placeName,@required this.placeId, @required this.placeType}) : super(key: key);
+  const ReviewRate({Key key, @required this.placeName,@required this.placeId, @required this.placeType, this.isUserReviewed, this.rating}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -21,10 +22,10 @@ class ReviewRate extends StatelessWidget{
           Padding(
             padding: EdgeInsets.fromLTRB(0, 8, 0, 0),
           ),
-          Text("Share your Experience"),
+          !isUserReviewed?Text("Share your Experience"):Container(),
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: RatingBar(
+            child: !isUserReviewed? RatingBar(
             initialRating: 0,
             direction: Axis.horizontal,
             allowHalfRating: false,
@@ -55,6 +56,16 @@ class ReviewRate extends StatelessWidget{
               }
             }
               
+    ):RatingBarIndicator(
+      rating: rating,
+      unratedColor: Colors.white,
+      alpha: 100,
+      itemCount: 5,
+      itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
+      itemBuilder: (context, _) => Icon(
+        Icons.star,
+        color: Colors.deepOrange,
+      ),
     ),
           )
         ],

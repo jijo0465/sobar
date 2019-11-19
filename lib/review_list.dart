@@ -4,8 +4,9 @@ import 'package:kudians/bottom_sheet_text.dart';
 import 'package:kudians/bottom_sheet_title.dart';
 class ReviewList extends StatelessWidget{
   final List<Map<String,dynamic>> reviews;
+  final Map<String,dynamic> userReview;
 
-  const ReviewList({Key key, this.reviews}) : super(key: key);
+  const ReviewList({Key key, this.reviews, this.userReview}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return SliverList(
