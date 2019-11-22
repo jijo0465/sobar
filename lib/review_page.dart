@@ -1,11 +1,7 @@
 import 'dart:ui';
-
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:kudians/bottom_sheet_text.dart';
-import 'package:kudians/bottom_sheet_title.dart';
 import 'package:kudians/firebase_services.dart';
 import 'package:kudians/my_flutter_app_icons.dart';
 import 'package:kudians/photo_list.dart';

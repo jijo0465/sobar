@@ -29,7 +29,6 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
   SobarUsers sobarUser;
   FirebaseUser firebaseUser;
   bool isLogged=false;
-  BuildContext context;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final GlobalKey<FormState> _sobarNameFormKey = GlobalKey<FormState>();
   bool isVerified=false;
@@ -55,7 +54,6 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
   }
   @override
   Widget build(BuildContext context) {
-    context=context;
     print("BUILD Called");
     bannerAd..load()..show();
     return Stack(
@@ -382,10 +380,9 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
 
     final PhoneVerificationFailed verificationFailed =
         (AuthException authException) {
-      // setState(() {
-      //   _message =
-      //       'Phone number verification failed. Code: ${authException.code}. Message: ${authException.message}';
-      // });
+        _message =
+            'Phone number verification failed';
+        
     };
 
     final PhoneCodeSent codeSent =
@@ -414,7 +411,8 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
       verificationId: _verificationId,
       smsCode: _smsController.text,
     );
-    firebaseUser =
+    try{
+      firebaseUser =
         (await _auth.signInWithCredential(credential)).user;
     final FirebaseUser currentUser = await _auth.currentUser();
     assert(firebaseUser.uid == currentUser.uid);
@@ -435,8 +433,25 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
         // _message = 'Successfully signed in, uid: ' + user.uid;
         // Navigator.pop(context,user.uid);
       } else {
+        
         _message = 'Sign in failed';
       }
+
+    }catch (e){
+      showDialog(
+        context: context,
+        builder: (BuildContext context){
+          return AlertDialog(
+            content: Text('Somethings not right. Please try again'),
+            title: Text('Failed'),
+            actions: <Widget>[FlatButton(child: Text('Ok'),onPressed: (){
+              Navigator.of(context).pop();
+              })],
+          );
+        }
+      );
+    }
+    
   }
   Future<void> setUser() async {
     // sobarUser=SobarUsers(firebaseUser.uid);
