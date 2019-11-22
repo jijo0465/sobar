@@ -17,7 +17,7 @@
     <application
         android:name="io.flutter.app.FlutterApplication"
         android:label="kudians"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/launcher_icon">
         <receiver android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />
         <meta-data android:name="com.google.android.geo.API_KEY"
                android:value="AIzaSyAR6yclpjdj-1q8bwtOdvYm5JpKG7KOmCU"/>
