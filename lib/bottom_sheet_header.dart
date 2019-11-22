@@ -18,7 +18,7 @@ class BottomSheetHeader extends StatelessWidget{
     return Container(
       // margin: EdgeInsets.fromLTRB(12, 12, 0, 12),
       padding: EdgeInsets.fromLTRB(12, 0, 0, 8),
-      color: Colors.orange[300],
+      color: Colors.orange[200],
       child: AnimatedCrossFade(
           firstChild: Container(
             child: Column(

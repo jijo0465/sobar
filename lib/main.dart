@@ -5,6 +5,7 @@ import 'package:kudians/firebase_services.dart';
 import 'package:kudians/holidays.dart';
 import 'package:kudians/holidays_cache.dart';
 import 'package:kudians/kuppi.dart';
+import 'package:kudians/loading.dart';
 import 'package:kudians/price_list.dart';
 import 'package:kudians/price_list_cache.dart';
 import 'package:kudians/profile_page.dart';
@@ -52,6 +53,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
+    
     SqliteDb().openSqlite().then((value){
       setState(() {
         isEverythingCached=true;
@@ -89,26 +91,19 @@ class _MyHomePageState extends State<MyHomePage> {
   }
   @override
   Widget build(BuildContext context) {
+    precacheImage(AssetImage('assets/background.png'), context);
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: isEverythingCached? Container(
-        decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topRight,
-                end: Alignment.bottomLeft,
-                stops: [0.1,0.3, 0.5, 0.7,0.8, 0.9], 
-                colors: <Color>[
-                  Colors.black,
-                  Colors.grey[900],
-                  Colors.grey[800],
-                  Colors.grey[700],
-                  Colors.grey[600],
-                  Colors.grey[500],
-                  ],
-              )
-            ),
         child: Stack(
           children: <Widget>[
+            bottomNavSelected!=0? Container(
+              width: double.infinity,
+              height: double.infinity,
+              child: FittedBox(
+                fit:  BoxFit.fill,
+                child: Image.asset('assets/background.png')),
+            ):Container(),
             Center(child: _bottom_nav_options.elementAt(bottomNavSelected)),
             bottomNavigationar()
             // Container(
@@ -119,9 +114,7 @@ class _MyHomePageState extends State<MyHomePage> {
             //   child: Image.asset("assets/sobar_logo.png")
             // )
           ],),
-      ):Center(child: Container(
-        child: CupertinoActivityIndicator(animating: true,)
-        )),
+      ):Loading()
         );
       }
 
@@ -187,7 +180,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: CupertinoTabBar(
                   iconSize: 22,
                 items: [BottomNavigationBarItem(
-              icon: Icon(MyFlutterApp.maps_and_flags),
+              icon: Icon(Icons.map),
               title: Text("Map",style: TextStyle(letterSpacing: 1)),
               ),
               BottomNavigationBarItem( 

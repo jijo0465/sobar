@@ -310,5 +310,6 @@ class FirebaseServices{
         doc.updateData({'sobar_name':sobarUser.sobarName});
       }
     });
-  }  
+  }
+
 }

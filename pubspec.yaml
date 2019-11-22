@@ -69,6 +69,7 @@ flutter:
     - assets/toddy_marker.png
     - assets/bevco_marker.png
     - assets/sobar_db.db
+    - assets/background.png
   fonts:
     - family:  MyFlutterApp
       fonts:

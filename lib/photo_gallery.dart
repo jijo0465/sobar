@@ -6,9 +6,8 @@ import 'package:photo_view/photo_view_gallery.dart';
 
 class PhotoGallery extends StatelessWidget{
   final List<String> urlList;
-  final String title;
   final String source;
-  const PhotoGallery({Key key, this.urlList, this.title, @required this.source}) : super(key: key);
+  const PhotoGallery({Key key, this.urlList, @required this.source}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     int count=urlList.length;

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:kudians/calendar.dart';
 import 'package:kudians/firebase_services.dart';
@@ -67,26 +68,32 @@ class CalendarPage extends StatefulWidget{
   }
       @override
       Widget build(BuildContext context) {
-        return isHolidaySet? Container(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Container(
-                padding: EdgeInsets.fromLTRB(20, 40, 0, 0),
-                alignment: Alignment.centerLeft,
-                child: Text('DRY Days',
-                    style: TextStyle(color: Colors.deepOrange,fontSize: 20,fontWeight: FontWeight.w500, letterSpacing: 0.3),),
-              ),
-              Calendar(_holidays),
-              SizedBox(
-                height: 110,
-                child: SobarHolidayList(holidays: holidays,numOfHolidays: _numOfHolidays,),
-              ),
-              SizedBox(
-                height: 50,
-              )
-            ],
+        return isHolidaySet? BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 4,sigmaY: 4),
+          child: Container(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                // Container(
+                //   padding: EdgeInsets.fromLTRB(20, 40, 0, 0),
+                //   alignment: Alignment.centerLeft,
+                //   child: Text('DRY Days',
+                //       style: TextStyle(color: Colors.deepOrange,fontSize: 20,fontWeight: FontWeight.w500, letterSpacing: 0.3),),
+                // ),
+                SizedBox(
+                  height: 40,
+                ),
+                Calendar(_holidays),
+                SizedBox(
+                  height: 110,
+                  child: SobarHolidayList(holidays: holidays,numOfHolidays: _numOfHolidays,),
+                ),
+                SizedBox(
+                  height: 50,
+                )
+              ],
+            ),
           ),
         ):Container(
           child: Icon(Icons.local_bar),
@@ -106,12 +113,5 @@ class CalendarPage extends StatefulWidget{
         });
       });
     }
-    String getBannerAdUnitId() {
-  if (Platform.isIOS) {
-    return 'ca-app-pub-3940256099942544/2934735716';
-  } else if (Platform.isAndroid) {
-    return 'ca-app-pub-3940256099942544/6300978111';
-    }
-    return null;
-  }
+
 }

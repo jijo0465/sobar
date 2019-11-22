@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kudians/bottom_sheet_address_phone.dart';
 import 'package:kudians/bottom_sheet_header.dart';
+import 'package:kudians/bottom_sheet_title.dart';
 import 'package:kudians/editor_page.dart';
 import 'package:kudians/phone_signin_page.dart';
 import 'package:kudians/user_cache.dart';
@@ -79,6 +80,7 @@ class _BarMap extends State<BarMap>{
   void initState() {
     _geolocator=Geolocator();
     checkPermission();
+    // setUserLocation();
         super.initState();
         filterChoice="bevco";
         rootBundle.loadString('assets/map_style.json').then((string) {
@@ -265,12 +267,12 @@ class _BarMap extends State<BarMap>{
                   child: ClipRRect(
                     borderRadius: BorderRadius.all(Radius.circular(100)),
                     child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 4.0, sigmaY: 4.0),
+                      filter: ImageFilter.blur(sigmaX: 6.0, sigmaY: 6.0),
                       child: Container(
                         child: FloatingActionButton(
                           hoverElevation: 25,
                           splashColor: Colors.deepOrange,
-                          elevation: 15,
+                          elevation: 32,
                           backgroundColor: Colors.deepOrange[200].withOpacity(0.13),
                           foregroundColor: Colors.deepOrange,
                           child: Icon(Icons.add_location,size: 30,),
@@ -324,6 +326,7 @@ class _BarMap extends State<BarMap>{
         return url;
       }
       stopperBottomSheet(context,PlaceData place){
+        isUserReviewed=false;
         int placeId=place.placeId;
         String placePlaceId='';
         url=List<String>();
@@ -394,7 +397,7 @@ class _BarMap extends State<BarMap>{
                 clipBehavior: Clip.antiAlias,
                 child: Container(
                   margin: EdgeInsets.fromLTRB(5, 0, 5, 0),
-                  color: Colors.orange[200],
+                  color: Colors.orange[100],
                   child: Column(
                     children: <Widget>[
                       BottomSheetHeader(title: place.placeName,rating: place.placeRating,totalRated: place.placeTotalRating,type: type,bottState: stop,),
@@ -407,7 +410,17 @@ class _BarMap extends State<BarMap>{
                                 SobarDivider(),
                                 BottomSheetAddressPhone(address: address,phone: phone, latLng: latLng, placeId: placePlaceId, name:place.placeName),
                                 SobarDivider(),
-                                urlSet?PhotoList(count: url.length,url: url,title: place.placeName, source: "network",):Container(),
+                                url.length!=0?
+                                Column(
+                                  children: <Widget>[
+                                    Padding(
+                                      padding: EdgeInsets.fromLTRB(12, 12, 0, 0),
+                                      child: BottomSheetTitle(title:"Photos"),
+                                    ),
+                                    PhotoList(count: url.length,url: url, source: "network",)
+                                  ],
+                                )
+                                :Container(),
                                 SuggestEdit(placeData: place,type:filterChoice),
                                 isUserReviewed?ReviewRate(placeId: place.placeId,placeName: place.placeName,
                                 rating:  userReview['rating']*1.0,
@@ -436,9 +449,8 @@ class _BarMap extends State<BarMap>{
       }
     
       setUserLocation()async{
-        
         // Scaffold.of(context).showSnackBar(snackBar);
-        _geolocator.checkGeolocationPermissionStatus().then((status) async {
+        await _geolocator.checkGeolocationPermissionStatus().then((status) async {
           if(status==GeolocationStatus.granted){
             position = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
              _center=LatLng(position.latitude, position.longitude);
@@ -455,17 +467,13 @@ class _BarMap extends State<BarMap>{
         PermissionStatus permission = await PermissionHandler().checkPermissionStatus(PermissionGroup.location);
           _status=permission;
         if(_status==PermissionStatus.unknown||_status==PermissionStatus.denied){
-          PermissionHandler().requestPermissions([PermissionGroup.locationWhenInUse]).then((value){
+          await PermissionHandler().requestPermissions([PermissionGroup.locationWhenInUse]).then((value){
             final status = value[PermissionGroup.locationWhenInUse];
             if(status!=PermissionStatus.granted){
               PermissionHandler().openAppSettings();
-            }else{
-              _status = status;
             }
-            
           });
-        }if(_status==PermissionStatus.granted){
-          setUserLocation();
         }
+        setUserLocation();
       }
 }

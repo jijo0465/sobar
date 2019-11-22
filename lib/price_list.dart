@@ -16,13 +16,15 @@ class PriceList extends StatefulWidget{
 
 class _PriceList  extends State<PriceList>{
   FocusNode _focusNode=FocusNode();
+  ScrollController _scrollController;
   List<Kuppi> kuppi;
   List<Kuppi> filteredKuppi= List();
   String _searchText="";
   List<String> tempNames;
   TextEditingController _searchController=TextEditingController();
-  bool isFocus=false;
+  bool isFocus;
   bool interstitialIsLoaded=false;
+  bool isAdShown=false;
     static final MobileAdTargetingInfo targetingInfo= MobileAdTargetingInfo(
       testDevices: APP_ID !=null? [APP_ID] : null,
       keywords: ['Games','Puzzles']
@@ -44,10 +46,17 @@ class _PriceList  extends State<PriceList>{
     }
   @override
   void initState() {
+    isFocus=false;
+    _scrollController=ScrollController();
+    _scrollController.addListener((){
+      if(isFocus){
+        FocusScope.of(context).requestFocus(FocusNode());
+      }
+    });
     FirebaseAdMob.instance.initialize(appId: FirebaseAdMob.testAppId);
       // bannerAd = buildBannerAd()..load();
       interstitialAd = buildInterstitialAd()..load();
-      interstitialAd..load()..show();
+      
     kuppi = List<Kuppi>();
      _focusNode.addListener(_onFocusChange);
          if(PriceListCache().isCached()){
@@ -65,6 +74,7 @@ class _PriceList  extends State<PriceList>{
          }
          
          _searchController.addListener((){
+           
            if (_searchController.text.isEmpty) {
              setState(() {
                _searchText = "";
@@ -79,8 +89,9 @@ class _PriceList  extends State<PriceList>{
          super.initState();
        }
        @override
-         void dispose() {
+    void dispose() {
     interstitialAd?.dispose();
+    isAdShown=false;
     super.dispose();
   }
        @override
@@ -99,12 +110,12 @@ class _PriceList  extends State<PriceList>{
                             alignment: Alignment.centerLeft,
                             padding: EdgeInsets.fromLTRB(8,12,0,0),
                             child: Text('BEVCO Price List',
-                              style: TextStyle(color: Colors.deepOrange,fontSize: 20,fontWeight: FontWeight.w500, letterSpacing: 0.3),),
+                              style: TextStyle(color: Colors.white,fontSize: 20,fontWeight: FontWeight.w500, letterSpacing: 0.3),),
                           ),
                         searchBar(),
                       ],
                     )),
-                    duration: const Duration(milliseconds: 210),
+                    duration: const Duration(milliseconds: 400),
                     crossFadeState: isFocus ? CrossFadeState.showFirst : CrossFadeState.showSecond,
                 ),
                  
@@ -129,35 +140,45 @@ class _PriceList  extends State<PriceList>{
          filteredKuppi=tempKuppi;
        }
        return ListView.builder(
+         controller: _scrollController,
+         scrollDirection: Axis.vertical,
          itemCount: kuppi.length==0 ? 0 : filteredKuppi.length,
          itemBuilder: (BuildContext context, int index) {
            return Card(
              elevation: 6,
+             color: Colors.transparent,
              shape: RoundedRectangleBorder(
                borderRadius: BorderRadius.circular(12)
              ),
-             child: Container(
-               child: ListTile(
-                 onTap: (){
-                   if(isFocus){
-                      FocusScope.of(context).requestFocus(FocusNode());
-                   }
-                     },
-                 isThreeLine: false,
-                 title: Text(filteredKuppi[index].name),
-                 subtitle: Padding(
-                   padding: const EdgeInsets.only(top: 8),
-                   child: Row(
-                     children: <Widget>[
-                       Expanded(child: Text("Category: "+filteredKuppi[index].category),),
-                       Expanded(child: Text("Size: "+filteredKuppi[index].size),),
-                     ],
-                   ),
-                 ),
-                 trailing: Text("₹ "+filteredKuppi[index].price.toString(),style: TextStyle(fontSize: 20),),
-                 ),
-             decoration: BoxDecoration(color: Colors.orange[200], borderRadius: BorderRadius.circular(12)),
-           ),);
+             child: ClipRRect(
+               borderRadius: BorderRadius.circular(12),
+                  child: BackdropFilter(
+                 filter: new ImageFilter.blur(sigmaX: 17.0, sigmaY: 17.0),
+                    child: Container(
+                   child: ListTile(
+                     onTap: (){
+                       if(isFocus){
+                          FocusScope.of(context).requestFocus(FocusNode());
+                       }
+                         },
+                     isThreeLine: false,
+                     title: Text(filteredKuppi[index].name,style: TextStyle(color: Colors.orange[100].withOpacity(0.8)),),
+                     subtitle: Padding(
+                       padding: const EdgeInsets.only(top: 8),
+                       child: Row(
+                         children: <Widget>[
+                           Expanded(child: Text("Category: "+filteredKuppi[index].category,
+                           style: TextStyle(color: Colors.white.withOpacity(0.8)),)),
+                           Expanded(child: Text("Size: "+filteredKuppi[index].size, style: TextStyle(color: Colors.white.withOpacity(0.7))),),
+                         ],
+                       ),
+                     ),
+                     trailing: Text("₹ "+filteredKuppi[index].price.toString(),style: TextStyle(fontSize: 20,color: Colors.white),),
+                     ),
+                 decoration: BoxDecoration(color: Colors.white.withOpacity(0.1), ),
+           ),
+               ),
+             ),);
            
          },
        );
@@ -165,8 +186,8 @@ class _PriceList  extends State<PriceList>{
      Widget searchBar(){
        return 
                   Container(
-                       height: 70,
-                       padding: EdgeInsets.all(12),
+                      //  height: 70,
+                       padding: EdgeInsets.fromLTRB(4,8,4,2),
                        child: ClipRect(
                           child: BackdropFilter(
                             child:DecoratedBox(
@@ -178,27 +199,26 @@ class _PriceList  extends State<PriceList>{
                            border: Border.all(color: Colors.black26,)
                          ),
                          child: TextField(
+                           textAlignVertical: TextAlignVertical.center,
                            style: TextStyle(
-                             color: Colors.deepOrangeAccent[100]
+                             color: Colors.deepOrangeAccent[100],
+                             fontSize: 17
                            ),
                            cursorColor: Colors.deepOrange,
-                          focusNode: _focusNode,
-                          decoration: InputDecoration(
-                           border: InputBorder.none,
-                           suffixIcon: isFocus?IconButton(
+                            focusNode: _focusNode,
+                            decoration: InputDecoration(
+                            hintText: 'Search..',
+                            border: InputBorder.none,
+                            suffixIcon: isFocus?IconButton(
                              icon: Icon(Icons.close,
                               color: Colors.orangeAccent,),
                               onPressed:(){
                                 FocusScope.of(context).requestFocus(FocusNode());
-                                
                                   _searchController.text='';
                               
                                 }): 
                               Icon(Icons.search,color: Colors.white,),
                            contentPadding: EdgeInsets.fromLTRB(12, 2, 4, 0),
-                           prefixText: "",
-                           labelText: "Search..",
-                           
                            labelStyle: TextStyle(
                              color: Colors.white
                            )
@@ -213,6 +233,11 @@ class _PriceList  extends State<PriceList>{
        );
      }
        void _onFocusChange() {
+         if(!isAdShown){
+           interstitialAd..load()..show();
+           isAdShown=true;
+         }
+         
          setState(() {
           isFocus=_focusNode.hasFocus; 
          });

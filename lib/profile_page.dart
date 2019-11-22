@@ -64,12 +64,15 @@ class _ProfilePage extends State<ProfilePage>{
                   controller: _scrollController,
                   children: <Widget>[
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 65, 0, 50),
+                      padding: EdgeInsets.fromLTRB(MediaQuery.of(context).size.width*0.3, 
+                      MediaQuery.of(context).size.height*0.07, 
+                      MediaQuery.of(context).size.width*0.3, 50),
                       child: Container(
                         child: Stack(
                           alignment: Alignment.bottomCenter,
                           children: <Widget>[
                             CircleAvatar(
+                              backgroundColor: Colors.white70,
                               radius: 80,
                               backgroundImage: !isLogged||photoUrl==''?AssetImage("assets/user.png"): NetworkImage(photoUrl),
                              ),isLogged?
@@ -95,7 +98,25 @@ class _ProfilePage extends State<ProfilePage>{
                                   }
                                 }),
                                 bottom: 2,
-                             ):Container()]),
+                             ):Container(),
+                             !isLogged||photoUrl==''?Container():
+                             Positioned(
+                               top: 0,
+                               right: 0,
+                               child: Container(
+                                 child: IconButton(
+                                   icon: Icon(Icons.delete_forever,color: Colors.deepOrange.withOpacity(0.8),size: 25,),
+                                   onPressed: (){
+                                     UserCache().setPhotoUrl('');
+                                     setState(() {
+                                       photoUrl='';
+                                     });
+                                     updateProfile();
+                                   },
+                                 ),
+                               ),
+                             )
+                             ]),
                       )),
                       isLogged?
                       Padding(
@@ -175,16 +196,16 @@ class _ProfilePage extends State<ProfilePage>{
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         RaisedButton(
-                          elevation: 6,
+                          elevation: 3,
                           hoverElevation: 10,
-                          hoverColor: Colors.deepOrange[800],
+                          hoverColor: Colors.black,
                           onPressed: isLogged?updateProfile:null,
-                          color: Colors.deepOrange,
-                          child: Text("Save",style: TextStyle(color:Colors.white,letterSpacing: 0.2)),
+                          color: Colors.black,
+                          child: Text("Update",style: TextStyle(color:Colors.white,letterSpacing: 0.2)),
                         ),FlatButton(
                             child: Text("Logout",style: TextStyle(
                               letterSpacing: 0.2,
-                              color: Colors.deepOrange
+                              color: Colors.deepOrange.withOpacity(0.8)
                             ),),
                             onPressed: ()async {
                               await FirebaseAuth.instance.signOut();
@@ -214,7 +235,7 @@ class _ProfilePage extends State<ProfilePage>{
           // }
             
             void updateProfile() async {
-              final success = SnackBar(content: Text('Saved Successfully!'), action: SnackBarAction(label: "OK",onPressed: (){},),);
+              final success = SnackBar(content: Text('Updated Successfully!'), action: SnackBarAction(label: "OK",onPressed: (){},),);
               final fail=SnackBar(content: Text("Something went Wrong!"),);
               SobarUsers _sobarUser=SobarUsers(sobarUser.userId);
               SobarUsers updatedUser;
