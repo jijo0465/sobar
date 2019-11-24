@@ -1,7 +1,7 @@
 
 class PrivacyPolicy{
 
-  List<String> titles=["Privacy Policy\n",
+  List<String> titles=["Privacy Policy\n\n",
   "\n\nInformation Collection and Use\n",
   "\n\nLog Data\n",
   "\n\nCookies\n",
