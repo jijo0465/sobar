@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:kudians/firebase_services.dart';
 import 'package:kudians/phone_signin_page.dart';
+import 'package:kudians/privacy_policy.dart';
 import 'package:kudians/sobar_form_field.dart';
 import 'package:kudians/user_cache.dart';
 import 'package:kudians/users.dart';
@@ -127,13 +128,37 @@ class _ProfilePage extends State<ProfilePage>{
                                right: 0,
                                child: Container(
                                  child: IconButton(
-                                   icon: Icon(Icons.delete,color: Colors.deepOrange.withOpacity(0.8),size: 25,),
+                                   icon: Icon(Icons.delete,color: Colors.white.withOpacity(0.8),size: 25,),
                                    onPressed: (){
-                                     UserCache().setPhotoUrl('');
-                                     setState(() {
-                                       photoUrl='';
-                                     });
-                                     updateProfile();
+                                     showDialog(
+                                       context: context,
+                                       builder: (BuildContext contect){
+                                         return AlertDialog(
+                                           title: Text('Delete Photo'),
+                                           content: Text('Your profile photo will be removed permanently'),
+                                           actions: <Widget>[
+                                             FlatButton(
+                                               child: Text('Cancel'),
+                                               onPressed: (){
+                                                 Navigator.of(context).pop();
+                                               },
+                                             ),
+                                             FlatButton(
+                                               child: Text('Ok'),
+                                               onPressed: (){
+                                                 UserCache().setPhotoUrl('');
+                                                  setState(() {
+                                                    photoUrl='';
+                                                  });
+                                                  Navigator.of(context).pop();
+                                                  updateProfile();
+                                               },
+                                             )
+                                           ],
+                                         );
+                                       }
+                                     );
+                                     
                                    },
                                  ),
                                ),
@@ -234,79 +259,165 @@ class _ProfilePage extends State<ProfilePage>{
                     ),
                     Container(
                   alignment: Alignment.bottomCenter,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 20, 0, 75),
-                    child: isLogged?Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        RaisedButton(
-                          elevation: 3,
-                          hoverElevation: 10,
-                          hoverColor: Colors.black,
-                          onPressed: isLogged?updateProfile:null,
-                          color: Colors.black,
-                          child: Text("Update",style: TextStyle(color:Colors.white,letterSpacing: 0.2)),
-                        ),FlatButton(
-                            child: Text("Logout",style: TextStyle(
-                              letterSpacing: 0.2,
-                              color: Colors.deepOrange.withOpacity(0.8)
-                            ),),
-                            onPressed: ()async {
-                              await FirebaseAuth.instance.signOut();
-                              // _handleSignOut();
-                              setState(() {
-                                isLogged=false; 
-                              });
-                              UserCache().clearUserCache();
-                            },
-                          )
-                            ],
-                          ):Container(),
-                  ),
-                )
-            ],
-          );
-         }
-          // Future<void> setUser(String uid) async {
-          //       await FirebaseServices().getSobarUser(uid).then((value){
-          //         sobarUser=value;
-          //     });
-          //     if(sobarUser!=null){
-          //       UserCache().setUser(sobarUser);
-          //       setState(() {
-          //             isLogged=true;
-          //           });
-          //       }
-          // }
-            
-            void updateProfile() async {
-              final success = SnackBar(content: Text('Updated Successfully!'), action: SnackBarAction(label: "OK",onPressed: (){},),);
-              final fail=SnackBar(content: Text("Something went Wrong!"),);
-              SobarUsers _sobarUser=SobarUsers(sobarUser.userId);
-              SobarUsers updatedUser;
-              _sobarUser.firstName=firstName.trim();
-              _sobarUser.lastName=lastName.trim();
-              _sobarUser.phoneNumber=sobarUser.phoneNumber;
-              _sobarUser.sobarName=sobarName.trim();
-              try{
-                updatedUser=await FirebaseServices().updateProfile(_sobarUser);
-                setState(() {
-                 sobarUser=updatedUser; 
-                });
-                UserCache().setUser(sobarUser);
-              }catch(e) {
-                Scaffold.of(context).showSnackBar(fail);
-              }
-                Scaffold.of(context).showSnackBar(success);
-            }
-      
-        void setAllfields(SobarUsers sobarUser) {
-          firstName=sobarUser.firstName;
-          lastName=sobarUser.lastName;
-          phone=sobarUser.phoneNumber;
-          photoUrl=sobarUser.photoUrl;
-          sobarName=sobarUser.sobarName;
-        }
+                  child: isLogged?Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      RaisedButton(
+                        elevation: 3,
+                        hoverElevation: 10,
+                        hoverColor: Colors.black,
+                        onPressed: isLogged?updateProfile:null,
+                        color: Colors.black,
+                        child: Text("Update",style: TextStyle(color:Colors.white,letterSpacing: 0.2)),
+                      ),FlatButton(
+                          child: Text("Logout",style: TextStyle(
+                            letterSpacing: 0.2,
+                            color: Colors.deepOrange.withOpacity(0.8)
+                          ),),
+                          onPressed: ()async {
+                            await FirebaseAuth.instance.signOut();
+                            // _handleSignOut();
+                            setState(() {
+                              isLogged=false; 
+                            });
+                            UserCache().clearUserCache();
+                          },
+                        )
+                          ],
+                        ):Container(),
+                ),
+                isLogged?Container(
+                  // alignment: Alignment.topCenter,
+                  child: FlatButton(
+                    child: Text('Read our privacy policy',style: TextStyle(color: Colors.white24),),
+                    onPressed: (){
+                      _showPrivacyDialog();
+                                          },
+                                        ),
+                                      ):Container()
+                                  ],
+                                );
+                               }
+                                // Future<void> setUser(String uid) async {
+                                //       await FirebaseServices().getSobarUser(uid).then((value){
+                                //         sobarUser=value;
+                                //     });
+                                //     if(sobarUser!=null){
+                                //       UserCache().setUser(sobarUser);
+                                //       setState(() {
+                                //             isLogged=true;
+                                //           });
+                                //       }
+                                // }
+                                  
+                                  void updateProfile() async {
+                                    final success = SnackBar(content: Text('Updated Successfully!'), action: SnackBarAction(label: "OK",onPressed: (){},),);
+                                    final fail=SnackBar(content: Text("Something went Wrong!"),);
+                                    SobarUsers _sobarUser=SobarUsers(sobarUser.userId);
+                                    SobarUsers updatedUser;
+                                    _sobarUser.firstName=firstName.trim();
+                                    _sobarUser.lastName=lastName.trim();
+                                    _sobarUser.phoneNumber=sobarUser.phoneNumber;
+                                    _sobarUser.sobarName=sobarName.trim();
+                                    try{
+                                      updatedUser=await FirebaseServices().updateProfile(_sobarUser);
+                                      setState(() {
+                                       sobarUser=updatedUser; 
+                                      });
+                                      UserCache().setUser(sobarUser);
+                                    }catch(e) {
+                                      Scaffold.of(context).showSnackBar(fail);
+                                    }
+                                      Scaffold.of(context).showSnackBar(success);
+                                  }
+                            
+                              void setAllfields(SobarUsers sobarUser) {
+                                firstName=sobarUser.firstName;
+                                lastName=sobarUser.lastName;
+                                phone=sobarUser.phoneNumber;
+                                photoUrl=sobarUser.photoUrl;
+                                sobarName=sobarUser.sobarName;
+                              }
+                      
+                        void _showPrivacyDialog() {
+                          TextStyle titleStyle=TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600
+                          );
+                          TextStyle subTitleStyle=TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500
+                          );
+                          TextStyle descStyle=TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w400,
+                            fontSize: 11
+                          );
+                          showDialog(
+                            context: context,
+                            barrierDismissible: true,
+                            builder: (BuildContext context){
+                              return Dialog(
+                                
+                                child: Container(
+                                  padding: EdgeInsets.all(8),
+                                  height: MediaQuery.of(context).size.height*0.7,
+                                  width: MediaQuery.of(context).size.width*0.8,
+                                  color: Colors.black87,
+                                  child: Stack(
+                                    children: <Widget>[
+                                      Container(
+                                        child: SingleChildScrollView(
+                                          child: RichText(
+                                            text: TextSpan(
+                                              children: <TextSpan>[
+                                                  TextSpan(text: PrivacyPolicy().titles[0],style: titleStyle),
+                                                  TextSpan(text: PrivacyPolicy().descriptions[0],style: descStyle),
+                                                  TextSpan(text: PrivacyPolicy().titles[1],style: subTitleStyle),
+                                                  TextSpan(text: PrivacyPolicy().descriptions[1],style: descStyle),
+                                                  TextSpan(text: PrivacyPolicy().titles[2],style: subTitleStyle),
+                                                  TextSpan(text: PrivacyPolicy().descriptions[2],style: descStyle),
+                                                  TextSpan(text: PrivacyPolicy().titles[3],style: subTitleStyle),
+                                                  TextSpan(text: PrivacyPolicy().descriptions[3],style: descStyle),
+                                                  TextSpan(text: PrivacyPolicy().titles[4],style: subTitleStyle),
+                                                  TextSpan(text: PrivacyPolicy().descriptions[4],style: descStyle),
+                                                  TextSpan(text: PrivacyPolicy().titles[5],style: subTitleStyle),
+                                                  TextSpan(text: PrivacyPolicy().descriptions[5],style: descStyle),
+                                                  TextSpan(text: PrivacyPolicy().titles[6],style: subTitleStyle),
+                                                  TextSpan(text: PrivacyPolicy().descriptions[6],style: descStyle),
+                                                  TextSpan(text: PrivacyPolicy().titles[7],style: subTitleStyle),
+                                                  TextSpan(text: PrivacyPolicy().descriptions[7],style: descStyle),
+                                                  TextSpan(text: PrivacyPolicy().titles[8],style: subTitleStyle),
+                                                  TextSpan(text: PrivacyPolicy().descriptions[8],style: descStyle),
+                                                  TextSpan(text: PrivacyPolicy().titles[9],style: subTitleStyle),
+                                                  TextSpan(text: PrivacyPolicy().descriptions[9],style: descStyle),
+
+                                              ]
+                                            ),
+                                            
+                                            
+                                          ),
+                                        ),
+                                      ),
+                                      Container(
+                                        alignment: Alignment.topRight,
+                                        child: IconButton(
+                                          icon: Icon(Icons.close,color: Colors.white70,),
+                                          onPressed: (){
+                                            Navigator.of(context).pop();
+                                          },
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                                backgroundColor: Colors.white,
+                              );
+                            }
+                          );
+                        }
   //         Future<void> _handleGetContact() async {
   //           setState(() {
   //             _contactText = "Loading contact info...";
