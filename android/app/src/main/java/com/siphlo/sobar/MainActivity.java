@@ -1,4 +1,4 @@
-package com.example.kudians;
+package com.siphlo.sobar;
 
 import android.os.Bundle;
 import io.flutter.app.FlutterActivity;

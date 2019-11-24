@@ -25,14 +25,14 @@ class CalendarPage extends StatefulWidget{
     DateTime today = DateTime.now();
     bool interstitialIsLoaded=false;
     static final MobileAdTargetingInfo targetingInfo= MobileAdTargetingInfo(
-      testDevices: APP_ID !=null? [APP_ID] : null,
-      keywords: ['Games','Puzzles']
+      testDevices: <String>[],
+      keywords: ['Games','Puzzles','Shopping','Dating'],
     );
 
     InterstitialAd interstitialAd;
     InterstitialAd buildInterstitialAd(){
       return InterstitialAd(
-        adUnitId: InterstitialAd.testAdUnitId,
+        adUnitId: 'ca-app-pub-7846270136949123/6944023979',
         targetingInfo: targetingInfo,
         listener: (MobileAdEvent event){
           if(event==MobileAdEvent.failedToLoad){
@@ -55,7 +55,7 @@ class CalendarPage extends StatefulWidget{
       }else{
         setHolidays();
       }
-      FirebaseAdMob.instance.initialize(appId: FirebaseAdMob.testAppId);
+      FirebaseAdMob.instance.initialize(appId: APP_ID);
       interstitialAd = buildInterstitialAd()..load();
       interstitialAd..load()..show();
       super.initState();

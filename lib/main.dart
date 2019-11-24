@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:kudians/firebase_services.dart';
 import 'package:kudians/holidays.dart';
 import 'package:kudians/holidays_cache.dart';
@@ -92,6 +93,10 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     precacheImage(AssetImage('assets/background.png'), context);
+    SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+      ]);
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: isEverythingCached? Container(

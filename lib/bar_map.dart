@@ -28,23 +28,11 @@ import 'package:timeago/timeago.dart' as timeago;
 const MAP_API="AIzaSyAR6yclpjdj-1q8bwtOdvYm5JpKG7KOmCU";
 
 class BarMap extends StatefulWidget{
-  // static PersistentBottomSheetController bottomSheetController;
   const BarMap();
   @override
   State<StatefulWidget> createState() {
     return _BarMap();
       }
-
-  // static closeBottomSheet() async {
-  //   try{
-  //     bottomSheetController.close();
-  //   }catch(e){
-  //     print("Just ignored");
-  //   }
-  //     }
-  // setBottomSheetController(controller){
-  //   bottomSheetController=controller;
-  // }
 }
         
 class _BarMap extends State<BarMap>{
@@ -337,7 +325,7 @@ class _BarMap extends State<BarMap>{
               reviews=value['reviews'];
             });
           sobarReviews=value['sobar_reviews'];
-          if(sobarReviews.isNotEmpty){
+          if(UserCache().isCached()&& sobarReviews.isNotEmpty){
             for(int i=0;i<sobarReviews.length;i++){
               Map<String,dynamic> rev=sobarReviews[i];
               if(UserCache().getUser().userId==rev['author_id']){
@@ -349,13 +337,11 @@ class _BarMap extends State<BarMap>{
                 });
                   continue;
               }
-              print(isUserReviewed);
             }
           }
             
               for(int photoId in value['photos']){
                 getUrl(placeId,photoId).then((value){
-                  print(value);
                   url.add(value);
           });
         }

@@ -1,10 +1,9 @@
 import 'dart:ui';
-
-import 'package:firebase_admob/firebase_admob.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kudians/firebase_services.dart';
+import 'package:kudians/loading.dart';
 import 'package:kudians/my_flutter_app_icons.dart';
 import 'package:kudians/user_cache.dart';
 import 'package:kudians/users.dart';
@@ -29,34 +28,34 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
   SobarUsers sobarUser;
   FirebaseUser firebaseUser;
   bool isLogged=false;
+  bool isLoading=false;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final GlobalKey<FormState> _sobarNameFormKey = GlobalKey<FormState>();
   bool isVerified=false;
-  BannerAd bannerAd;
-    BannerAd buildBannerAd(){
-      return BannerAd(
-        adUnitId: BannerAd.testAdUnitId,
-        size: AdSize.banner,
-        listener: (MobileAdEvent event){
-        }
-      );
-    }
+  // BannerAd bannerAd;
+  //   BannerAd buildBannerAd(){
+  //     return BannerAd(
+  //       adUnitId: 'ca-app-pub-7846270136949123/2803648150',
+  //       size: AdSize.banner,
+  //       listener: (MobileAdEvent event){
+  //       }
+  //     );
+  //   }
 @override
   void initState() {
-    bannerAd = buildBannerAd()..load();
+    // bannerAd = buildBannerAd()..load();
     super.initState();
   }
 
   @override
   void dispose() {
-    bannerAd?.dispose();
+    // bannerAd?.dispose();
     super.dispose();
   }
   @override
   Widget build(BuildContext context) {
-    print("BUILD Called");
-    bannerAd..load()..show();
-    return Stack(
+    // bannerAd..load()..show();
+    return isLoading?Loading(): Stack(
       children: <Widget>[
         Container(
               width: double.infinity,
@@ -355,6 +354,9 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
               );
               
             }
+            // if(shouldPop){
+            //   bannerAd?.dispose();
+            // }
             return Future.value(shouldPop);
           },
         ),
@@ -407,6 +409,9 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
 
   // Example code of how to sign in with phone.
   void _signInWithPhoneNumber() async {
+    setState(() {
+      isLoading=true;
+    });
     final AuthCredential credential = PhoneAuthProvider.getCredential(
       verificationId: _verificationId,
       smsCode: _smsController.text,
@@ -451,7 +456,9 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
         }
       );
     }
-    
+    setState(() {
+      isLoading=false;
+    });
   }
   Future<void> setUser() async {
     // sobarUser=SobarUsers(firebaseUser.uid);

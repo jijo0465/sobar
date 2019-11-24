@@ -26,14 +26,14 @@ class _PriceList  extends State<PriceList>{
   bool interstitialIsLoaded=false;
   bool isAdShown=false;
     static final MobileAdTargetingInfo targetingInfo= MobileAdTargetingInfo(
-      testDevices: APP_ID !=null? [APP_ID] : null,
-      keywords: ['Games','Puzzles']
+      testDevices: <String>[],
+      keywords: ['Games','Puzzles','dating','shopping']
     );
         InterstitialAd interstitialAd;
         
     InterstitialAd buildInterstitialAd(){
       return InterstitialAd(
-        adUnitId: InterstitialAd.testAdUnitId,
+        adUnitId: 'ca-app-pub-7846270136949123/6448010582',
         targetingInfo: targetingInfo,
         listener: (MobileAdEvent event){
           if(event==MobileAdEvent.failedToLoad){
@@ -53,7 +53,7 @@ class _PriceList  extends State<PriceList>{
         FocusScope.of(context).requestFocus(FocusNode());
       }
     });
-    FirebaseAdMob.instance.initialize(appId: FirebaseAdMob.testAppId);
+    FirebaseAdMob.instance.initialize(appId: APP_ID);
       // bannerAd = buildBannerAd()..load();
       interstitialAd = buildInterstitialAd()..load();
       
@@ -96,7 +96,6 @@ class _PriceList  extends State<PriceList>{
   }
        @override
        Widget build(BuildContext context) {
-        //  interstitialAd..load()..show();
          return Padding(
            padding: const EdgeInsets.fromLTRB(3,50,3,0),
            child: Container(
