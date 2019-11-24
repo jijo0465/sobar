@@ -182,7 +182,7 @@ class _ReviewPage extends State<ReviewPage>{
                           onPressed: ()async{
                             imageList=await MultiImagePicker.pickImages(
                               maxImages:10,
-                              enableCamera: true
+                              enableCamera: false
                             );
                             
                             for ( var imageFile in imageList) {
