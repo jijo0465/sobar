@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:kudians/ads.dart';
 import 'package:kudians/calendar.dart';
 import 'package:kudians/firebase_services.dart';
 import 'package:kudians/holidays_cache.dart';
@@ -55,9 +56,12 @@ class CalendarPage extends StatefulWidget{
       }else{
         setHolidays();
       }
-      FirebaseAdMob.instance.initialize(appId: APP_ID);
-      interstitialAd = buildInterstitialAd()..load();
-      interstitialAd..load()..show();
+      if(!Ads().isCalendarAdShown){
+        FirebaseAdMob.instance.initialize(appId: APP_ID);
+        interstitialAd = buildInterstitialAd()..load();
+        interstitialAd..load()..show();
+        Ads().isCalendarAdShown=true;
+      }
       super.initState();
   }
     @override
@@ -85,7 +89,7 @@ class CalendarPage extends StatefulWidget{
                 ),
                 Calendar(_holidays),
                 SizedBox(
-                  height: 110,
+                  height: 120,
                   child: SobarHolidayList(holidays: holidays,numOfHolidays: _numOfHolidays,),
                 ),
                 SizedBox(

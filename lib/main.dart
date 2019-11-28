@@ -93,6 +93,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     precacheImage(AssetImage('assets/background.png'), context);
+    precacheImage(AssetImage('assets/no_alcohol.png'), context);
     SystemChrome.setPreferredOrientations([
         DeviceOrientation.portraitUp,
         DeviceOrientation.portraitDown,

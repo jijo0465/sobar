@@ -1,3 +1,4 @@
+import 'package:timeago/timeago.dart' as timeago;
 class ReviewData{
   final String uid;
   String review;
@@ -25,5 +26,18 @@ class ReviewData{
       'time': reviewTime,
       'text': review,
     }];
+  }
+
+    Map<String, dynamic> toMap() {
+    return {
+      'author_id' : uid,
+      'profile_photo_url':profilePhotoUrl,
+      'author_name': authorName,
+      'rating': rating,
+      'photo_refs': photoRefs,
+      'time': reviewTime,
+      'text': review,
+      'relative_time_description':timeago.format(DateTime.now().subtract(DateTime.now().difference(reviewTime)))
+    };
   }
 }

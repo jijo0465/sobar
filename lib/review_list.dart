@@ -5,6 +5,7 @@ import 'package:kudians/bottom_sheet_title.dart';
 class ReviewList extends StatelessWidget{
   final List<Map<String,dynamic>> reviews;
   final Map<String,dynamic> userReview;
+  
 
   const ReviewList({Key key, this.reviews, this.userReview}) : super(key: key);
   @override
@@ -24,7 +25,8 @@ class ReviewList extends StatelessWidget{
                         shape: BoxShape.circle,
                         image: DecorationImage(
                             fit: BoxFit.fill,
-                            image: NetworkImage(
+                            image: reviews[idx]['profile_photo_url']==''?AssetImage('assets/user.png'):
+                            NetworkImage(
                               reviews[idx]['profile_photo_url']
                                 )
                         )
@@ -68,7 +70,7 @@ class ReviewList extends StatelessWidget{
                 ),
             subtitle: Padding(
               padding: const EdgeInsets.fromLTRB(15, 2, 12, 0),
-              child: Text('"'+reviews[idx]['text']+'"',style: TextStyle(color: Colors.grey[900]),),
+              child: reviews[idx]['text']!=''?Text('"'+reviews[idx]['text']+'"',style: TextStyle(color: Colors.grey[900]),):Text(''),
             ),
         ),
         childCount: reviews.length,

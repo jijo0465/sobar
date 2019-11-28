@@ -2,17 +2,31 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:kudians/phone_signin_page.dart';
+import 'package:kudians/review_data.dart';
 import 'package:kudians/review_page.dart';
 import 'package:kudians/user_cache.dart';
 
-class ReviewRate extends StatelessWidget{
+class ReviewRate extends StatefulWidget{
   final String placeName;
   final int placeId;
   final String placeType;
   final bool isUserReviewed;
   final double rating;
+  final ValueChanged<ReviewData> isReviwed;
+  const ReviewRate({Key key, @required this.placeName,@required this.placeId, @required this.placeType, this.isUserReviewed, this.rating, this.isReviwed}) : super(key: key);
 
-  const ReviewRate({Key key, @required this.placeName,@required this.placeId, @required this.placeType, this.isUserReviewed, this.rating}) : super(key: key);
+  @override
+  _ReviewRateState createState() => _ReviewRateState();
+}
+
+class _ReviewRateState extends State<ReviewRate> {
+  bool isReviewed=false;
+
+  @override
+  void initState() {
+    isReviewed=widget.isUserReviewed;
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -22,10 +36,10 @@ class ReviewRate extends StatelessWidget{
           Padding(
             padding: EdgeInsets.fromLTRB(0, 8, 0, 0),
           ),
-          !isUserReviewed?Text("Share your Experience"):Container(),
+          !widget.isUserReviewed?Text("Share your Experience"):Container(),
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: !isUserReviewed? RatingBar(
+            child: !widget.isUserReviewed? RatingBar(
             initialRating: 0,
             direction: Axis.horizontal,
             allowHalfRating: false,
@@ -45,19 +59,24 @@ class ReviewRate extends StatelessWidget{
               }));
               }
               if(UserCache().isCached()){
-                Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context){
+                ReviewData review = await Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context){
                 return ReviewPage(
-                  placeId: placeId,
-                  placeName: placeName,
+                  placeId: widget.placeId,
+                  placeName: widget.placeName,
                   rating: rating.toInt(),
-                  placeType: placeType,
+                  placeType: widget.placeType,
                 );
               }));
+              if(review!=null){
+                widget.isReviwed(review);
+              }else{
+                widget.isReviwed(null);
+              }
               }
             }
               
     ):RatingBarIndicator(
-      rating: rating,
+      rating: widget.rating,
       unratedColor: Colors.white,
       alpha: 100,
       itemCount: 5,
@@ -71,5 +90,4 @@ class ReviewRate extends StatelessWidget{
         ],
       ));
   }
-
 }

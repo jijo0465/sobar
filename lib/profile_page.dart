@@ -10,6 +10,7 @@ import 'package:kudians/sobar_form_field.dart';
 import 'package:kudians/user_cache.dart';
 import 'package:kudians/users.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
+import 'package:kudians/google_auth.dart';
 // import 'package:google_sign_in/google_sign_in.dart';
 // import "package:http/http.dart" as http;
 
@@ -32,16 +33,19 @@ class _ProfilePage extends State<ProfilePage>{
   FirebaseUser user;
   TextEditingController textEditingController;
   bool isLogged=false;
-  String firstName='';
-  String lastName='';
+  // String firstName='';
+  // String lastName='';
   String sobarName='';
   String phone='';
   List<Asset> imageList;
   List<String> urls;
   String photoUrl='';
+  String email='';
   File dp;
   SobarUsers sobarUser;
   String filePath;
+  bool isSobarNameEdited=false;
+  GoogleAuth googleAuth=GoogleAuth();
   // GoogleSignInAccount _currentUser;
   // String _contactText;
   
@@ -57,11 +61,12 @@ class _ProfilePage extends State<ProfilePage>{
             });
             }
             
-            firstName=sobarUser.firstName;
-            lastName=sobarUser.lastName;
+            // firstName=sobarUser.firstName;
+            // lastName=sobarUser.lastName;
             sobarName=sobarUser.sobarName;
             phone=sobarUser.phoneNumber;
             photoUrl=sobarUser.photoUrl;
+            email=sobarUser.email;
           }
           textEditingController=TextEditingController();
           // _googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount account) {
@@ -170,37 +175,49 @@ class _ProfilePage extends State<ProfilePage>{
                         padding: EdgeInsets.only(left: 12,right: 12),
                         child: Column(
                           children: <Widget>[
-                            SobarFormField(
-                            label: 'First Name',
-                            maxLines: 1, enabled: true,
-                            initialValue: sobarUser.firstName,
-                            onChanged: (value){
-                              firstName=value;
-                            },
-                          ),
-                          SobarFormField(
-                            label: 'Last Name',
-                            initialValue: sobarUser.lastName,
-                            maxLines: 1, enabled: true,
-                            onChanged: (value){
-                              lastName=value;
-                            },
-                          ),
+                          //   SobarFormField(
+                          //   label: 'First Name',
+                          //   maxLines: 1, enabled: true,
+                          //   initialValue: sobarUser.firstName,
+                          //   onChanged: (value){
+                          //     firstName=value;
+                          //   },
+                          // ),
+                          // SobarFormField(
+                          //   label: 'Last Name',
+                          //   initialValue: sobarUser.lastName,
+                          //   maxLines: 1, enabled: true,
+                          //   onChanged: (value){
+                          //     lastName=value;
+                          //   },
+                          // ),
                           SobarFormField(
                             label: 'Sobar Name',
                             initialValue: sobarUser.sobarName,
                             maxLines: 1, enabled: true,
+                            suffixIcon: Icon(Icons.edit,color: Colors.white54,),
                             onChanged: (value){
                               sobarName=value;
+                              if(sobarUser.sobarName != sobarName){
+                                setState(() {
+                                  isSobarNameEdited=true;
+                                });
+                              }else{
+                                setState(() {
+                                  isSobarNameEdited=false;
+                                });
+                              }
                             },
                           ),
-                          SobarFormField(
+                          UserCache().getUser().signInMethod=='phone'? SobarFormField(
                             label: 'Phone',
                             initialValue: sobarUser.phoneNumber,
                             maxLines: 1, enabled: false,
-                            onChanged: (value){
-                              phone=value;
-                            })
+                            ):SobarFormField(
+                            label: 'Email',
+                            initialValue: sobarUser.email,
+                            maxLines: 1, enabled: false,
+                            )
                           ],
                         ),
                       ):Column(
@@ -232,24 +249,7 @@ class _ProfilePage extends State<ProfilePage>{
                                 },
                               ),
                           ),
-                        //   Container(
-                        //     child: RaisedButton(
-                        //     onPressed: () {
-                        //         _handleSignIn();
-                        //     },
-                        //     padding: EdgeInsets.only(top: 3.0, bottom: 3.0, left: 3.0),
-                        //     color: const Color(0xFFFFFFFF),
-                        //     child: Container(
-                        //         padding: EdgeInsets.only(left: 10.0, right: 10.0),
-                        //         child: Text( 
-                        //           "Sign in with Google",
-                        //           style: TextStyle(
-                        //               color: Colors.grey,
-                        //               fontWeight: FontWeight.bold),
-                        //         )
-                        //     ),
-                        // )
-                        //   )
+                          
                         ],
                       )
                           
@@ -266,7 +266,8 @@ class _ProfilePage extends State<ProfilePage>{
                         elevation: 3,
                         hoverElevation: 10,
                         hoverColor: Colors.black,
-                        onPressed: isLogged?updateProfile:null,
+                        disabledElevation: 0,
+                        onPressed: updateProfile,
                         color: Colors.black,
                         child: Text("Update",style: TextStyle(color:Colors.white,letterSpacing: 0.2)),
                       ),FlatButton(
@@ -311,29 +312,28 @@ class _ProfilePage extends State<ProfilePage>{
                                 // }
                                   
                                   void updateProfile() async {
-                                    final success = SnackBar(content: Text('Updated Successfully!'), action: SnackBarAction(label: "OK",onPressed: (){},),);
-                                    final fail=SnackBar(content: Text("Something went Wrong!"),);
-                                    SobarUsers _sobarUser=SobarUsers(sobarUser.userId);
-                                    SobarUsers updatedUser;
-                                    _sobarUser.firstName=firstName.trim();
-                                    _sobarUser.lastName=lastName.trim();
-                                    _sobarUser.phoneNumber=sobarUser.phoneNumber;
-                                    _sobarUser.sobarName=sobarName.trim();
-                                    try{
-                                      updatedUser=await FirebaseServices().updateProfile(_sobarUser);
-                                      setState(() {
-                                       sobarUser=updatedUser; 
-                                      });
-                                      UserCache().setUser(sobarUser);
-                                    }catch(e) {
-                                      Scaffold.of(context).showSnackBar(fail);
+                                    if(!isSobarNameEdited){
+                                      final nothing=SnackBar(content: Text('Nothing to update!'),action: SnackBarAction(label: "OK",onPressed: (){},));
+                                      Scaffold.of(context).showSnackBar(nothing);
+                                    }else{
+                                      final success = SnackBar(content: Text('Updated Successfully!'), action: SnackBarAction(label: "OK",onPressed: (){},),);
+                                      final fail=SnackBar(content: Text("Something went Wrong!"),action: SnackBarAction(label: "OK",onPressed: (){},));
+                                      
+                                      // _sobarUser.phoneNumber=sobarUser.phoneNumber;
+                                      sobarUser.sobarName=sobarName.trim();
+                                      try{
+                                        FirebaseServices().updateProfile(sobarUser);
+                                        UserCache().setUser(sobarUser);
+                                      }catch(e) {
+                                        Scaffold.of(context).showSnackBar(fail);
+                                      }
+                                        Scaffold.of(context).showSnackBar(success);
                                     }
-                                      Scaffold.of(context).showSnackBar(success);
                                   }
                             
                               void setAllfields(SobarUsers sobarUser) {
-                                firstName=sobarUser.firstName;
-                                lastName=sobarUser.lastName;
+                                // firstName=sobarUser.firstName;
+                                // lastName=sobarUser.lastName;
                                 phone=sobarUser.phoneNumber;
                                 photoUrl=sobarUser.photoUrl;
                                 sobarName=sobarUser.sobarName;

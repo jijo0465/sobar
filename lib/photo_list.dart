@@ -29,7 +29,7 @@ class PhotoList extends StatelessWidget{
                           Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (BuildContext context){
-                                return PhotoGallery(urlList: url,source: source,);
+                                return PhotoGallery(urlList: url,source: source,index:index);
                               }
                             )
                             );

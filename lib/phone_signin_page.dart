@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kudians/firebase_services.dart';
+import 'package:kudians/google_auth.dart';
 import 'package:kudians/loading.dart';
 import 'package:kudians/my_flutter_app_icons.dart';
 import 'package:kudians/user_cache.dart';
@@ -229,7 +230,65 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
                             }
                           },
                         ),
-                  )
+                  ),SizedBox(
+                    height: 50,
+                  ),
+                  Container(
+                            child: RaisedButton(
+                              elevation: 7,
+                              color: Colors.black,
+                            onPressed: () async{
+                              setState(() {
+                                isLoading=true;
+                              });
+                                firebaseUser=await googleAuth.googleSignIn();
+                                if(firebaseUser!=null){
+                                   sobarUser=await FirebaseServices().getSobarUser(firebaseUser.uid);
+                                   UserCache().setUser(sobarUser);
+                                   if(sobarUser==null){
+                                     sobarUser=SobarUsers(firebaseUser.uid);
+                                      sobarUser.email=firebaseUser.email;
+                                      sobarUser.signInMethod='google';
+                                      sobarUser.sobarName=firebaseUser.displayName;
+                                      sobarUser.photoUrl=firebaseUser.photoUrl;
+                                      await setUser();
+                                   }
+                                    Navigator.pop(context);
+                                }else{
+                                  setState(() {
+                                    isLoading=false;
+                                  });
+                                  showErrorDialog();
+                                }
+                            },
+                            child: Container(
+                              padding: EdgeInsets.all(4),
+                              width: MediaQuery.of(context).size.width*0.6,
+                              height: 42,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: <Widget>[
+                                    Container(
+                                      width: 30,
+                                      height: 30,
+                                      child: FittedBox(
+                                        fit: BoxFit.fill,
+                                        child: Image.asset('assets/google.png'),
+                                      ),
+                                    ),
+                                    Container(
+                                      child: Text( 
+                                        "Sign in with Google",
+                                        style: TextStyle(
+                                            color: Colors.white.withOpacity(0.8),
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  ],
+                                )
+                            ),
+                        )
+                          )
                         ],),
                       ),
                     ),
@@ -433,7 +492,9 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
           isPreviouslyLogged=false;
           sobarUser=SobarUsers(firebaseUser.uid);
           sobarUser.phoneNumber=firebaseUser.phoneNumber;
+          
         }
+        sobarUser.signInMethod='phone';
         // setUser(user.uid);
         // _message = 'Successfully signed in, uid: ' + user.uid;
         // Navigator.pop(context,user.uid);
@@ -443,6 +504,23 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
       }
 
     }catch (e){
+      showErrorDialog();
+    }
+    setState(() {
+      isLoading=false;
+    });
+  }
+  Future<void> setUser() async {
+      await FirebaseServices().setSobarUser(sobarUser);
+      if(isPreviouslyLogged){
+        await FirebaseServices().getSobarUser(sobarUser.userId).then((value){
+          sobarUser=value;
+      });
+      }
+      UserCache().setUser(sobarUser);
+    }
+    
+    showErrorDialog(){
       showDialog(
         context: context,
         builder: (BuildContext context){
@@ -455,21 +533,5 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
           );
         }
       );
-    }
-    setState(() {
-      isLoading=false;
-    });
-  }
-  Future<void> setUser() async {
-    // sobarUser=SobarUsers(firebaseUser.uid);
-    // setUser.sobarName=sobarName==''?'sobar_user_':sobarName;
-    // setUser.phoneNumber=_phoneNumberController.text;
-      await FirebaseServices().setSobarUser(sobarUser);
-      if(isPreviouslyLogged){
-        await FirebaseServices().getSobarUser(sobarUser.userId).then((value){
-          sobarUser=value;
-      });
-      }
-      UserCache().setUser(sobarUser);
     }
 }

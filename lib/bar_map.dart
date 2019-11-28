@@ -340,9 +340,9 @@ class _BarMap extends State<BarMap>{
             }
           }
             
-              for(int photoId in value['photos']){
-                getUrl(placeId,photoId).then((value){
-                  url.add(value);
+        for(int photoId in value['photos']){
+          getUrl(placeId,photoId).then((value){
+            url.add(value);
           });
         }
         setState(() {
@@ -383,7 +383,7 @@ class _BarMap extends State<BarMap>{
                 clipBehavior: Clip.antiAlias,
                 child: Container(
                   margin: EdgeInsets.fromLTRB(5, 0, 5, 0),
-                  color: Colors.orange[100],
+                  color: Colors.white,
                   child: Column(
                     children: <Widget>[
                       BottomSheetHeader(title: place.placeName,rating: place.placeRating,totalRated: place.placeTotalRating,type: type,bottState: stop,),
@@ -412,13 +412,22 @@ class _BarMap extends State<BarMap>{
                                 rating:  userReview['rating']*1.0,
                                 placeType: filterChoice,isUserReviewed: isUserReviewed,):
                                 ReviewRate(placeId: place.placeId,placeName: place.placeName,
+                                isReviwed: (value){
+                                  if(value!=null){
+                                    userReview=value.toMap();
+                                    reviews.insert(0, value.toMap());
+                                    setState(() {
+                                      isUserReviewed=true;
+                                    });
+                                  }
+                                },
                                 rating:  0.0,
                                 placeType: filterChoice,isUserReviewed: isUserReviewed,),
                                 SobarDivider(),
                               ]
                             ),
                           ),
-                          isUserReviewed?ReviewList(reviews: reviews): ReviewList(reviews: reviews,)
+                          ReviewList(reviews: reviews)
                         ],
                         controller: scrollController,
                         physics: scrollPhysics,

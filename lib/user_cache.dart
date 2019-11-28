@@ -10,7 +10,7 @@ class UserCache {
   UserCache._internal() {
     _user=null;
   }
-
+  
   void setUser(SobarUsers user){
     this._user=user;
   }

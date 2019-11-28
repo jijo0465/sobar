@@ -30,6 +30,7 @@ class _ReviewPage extends State<ReviewPage>{
   List<Asset> imageList;
   int placeId;
   List<String> urls;
+  String response='none';
   
   @override
   void initState() {
@@ -221,9 +222,9 @@ class _ReviewPage extends State<ReviewPage>{
           builder: (BuildContext context){
             return AlertDialog(
               backgroundColor: Colors.orange[100],
-              title: Text("Success"),
+              title: Text("Confirm?"),
               content: Container(
-                child: Text("Your review will be verified and avilable soon!"),
+                child: Text("Once verified, Your review will be available to public"),
               ),
               actions: <Widget>[
                 FlatButton(child: Text("Cancel"), onPressed: () {
@@ -236,11 +237,18 @@ class _ReviewPage extends State<ReviewPage>{
                   reviewData.type=placeType;
                   reviewData.photos=urlList;
                   reviewData.placeId=placeId;
+                  reviewData.reviewTime=DateTime.now();
                   reviewData.authorName=UserCache().getUser().sobarName;
                   reviewData.profilePhotoUrl=UserCache().getUser().photoUrl;
-                  FirebaseServices().addReview(reviewData);
-                  Navigator.of(context).pop();
-                  Navigator.of(context).pop();
+                  try{
+                    FirebaseServices().addReview(reviewData);
+                    Navigator.of(context).pop();
+                    Navigator.pop(context,reviewData);
+                  }catch(e){
+                    Navigator.of(context).pop();
+                    Navigator.pop(context,reviewData);
+                  }
+                  
                 },
     
             )

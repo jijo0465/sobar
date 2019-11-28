@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -7,6 +8,7 @@ import 'package:kudians/holidays.dart';
 import 'package:kudians/kuppi.dart';
 import 'package:kudians/place_data.dart';
 import 'package:kudians/review_data.dart';
+import 'package:kudians/user_cache.dart';
 import 'package:kudians/users.dart';
 import 'package:uuid/uuid.dart';
 import 'bars.dart';
@@ -132,7 +134,7 @@ class FirebaseServices{
   }
 
 
-  Future<SobarUsers> updateProfile(SobarUsers sobarUser)async{
+  void updateProfile(SobarUsers sobarUser)async{
     String collection="sobar_users";
     String document=sobarUser.userId;
     DocumentReference docRef=firestore.collection(collection).document(document);
@@ -143,7 +145,6 @@ class FirebaseServices{
         docRef.setData(sobarUser.toMap());
       }
     });
-    return getSobarUser(sobarUser.userId);
   }
 
   Future<String> uploadDp(String filePath,String uid)async{
@@ -159,7 +160,6 @@ class FirebaseServices{
       }
     });
     return photoUrl;
-
   }
 
   Future<SobarUsers> getSobarUser(String uid)async{
@@ -172,11 +172,13 @@ class FirebaseServices{
       // }
       if(doc.exists){
         sobarUsers=SobarUsers(uid);
-        sobarUsers.firstName=doc.data['first_name']==null?'':doc.data['first_name'];
-        sobarUsers.lastName=doc.data['last_name']==null?'':doc.data['last_name'];
+        // sobarUsers.firstName=doc.data['first_name']==null?'':doc.data['first_name'];
+        // sobarUsers.lastName=doc.data['last_name']==null?'':doc.data['last_name'];
         sobarUsers.sobarName=doc.data['sobar_name']==null?'':doc.data['sobar_name'];
         sobarUsers.phoneNumber=doc.data['phone_number']==null?'':doc.data['phone_number'];
         sobarUsers.photoUrl=doc.data['photo_url']==null?'':doc.data['photo_url'];
+        sobarUsers.email=doc.data['email']==null?'':doc.data['email'];
+        sobarUsers.signInMethod=doc.data['sign_in_method'];
       }
     });
     return sobarUsers;
@@ -304,11 +306,7 @@ class FirebaseServices{
     DocumentReference doc;
     doc=firestore.collection("sobar_users").document(sobarUser.userId);
     await doc.get().then((document){
-      if(!document.exists){
-        doc.setData({'user_id':sobarUser.userId,'phone_number':sobarUser.phoneNumber,'sobar_name':sobarUser.sobarName});
-      }else{
-        doc.updateData({'sobar_name':sobarUser.sobarName});
-      }
+        doc.setData(sobarUser.toMap(),merge: true);
     });
   }
 

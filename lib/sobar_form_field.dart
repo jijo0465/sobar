@@ -9,7 +9,8 @@ class SobarFormField extends StatelessWidget{
   final int maxLines;
   final bool enabled;
   final TextEditingController controller;
-  const SobarFormField({Key key, this.label, this.initialValue, this.maxLines, this.onChanged, @required this.enabled, this.controller}) : super(key: key);
+  final Icon suffixIcon;
+  const SobarFormField({Key key, this.label, this.initialValue, this.maxLines, this.onChanged, @required this.enabled, this.controller, this.suffixIcon}) : super(key: key);
   @override
   
   Widget build(BuildContext context){
@@ -48,6 +49,7 @@ class SobarFormField extends StatelessWidget{
                 child: Container(
                   padding: (maxLines>1)? EdgeInsets.fromLTRB(0, 0, 50, 0):EdgeInsets.fromLTRB(0, 0, 8, 0),
                   child: TextFormField(
+                    
                     textInputAction: TextInputAction.done,
                     enabled: enabled,
                     onChanged: (string){
@@ -58,6 +60,7 @@ class SobarFormField extends StatelessWidget{
                     style: TextStyle(fontSize: 16,color: Colors.white),
                     initialValue: initialValue,
                     decoration: InputDecoration(
+                      suffixIcon: suffixIcon,
                       border: InputBorder.none
                   ),
                 ),

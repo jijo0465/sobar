@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/material.dart';
+import 'package:kudians/ads.dart';
 import 'package:kudians/app_id.dart';
 import 'package:kudians/firebase_services.dart';
 import 'package:kudians/kuppi.dart';
@@ -24,7 +25,6 @@ class _PriceList  extends State<PriceList>{
   TextEditingController _searchController=TextEditingController();
   bool isFocus;
   bool interstitialIsLoaded=false;
-  bool isAdShown=false;
     static final MobileAdTargetingInfo targetingInfo= MobileAdTargetingInfo(
       testDevices: <String>[],
       keywords: ['Games','Puzzles','dating','shopping']
@@ -91,7 +91,6 @@ class _PriceList  extends State<PriceList>{
        @override
     void dispose() {
     interstitialAd?.dispose();
-    isAdShown=false;
     super.dispose();
   }
        @override
@@ -232,9 +231,9 @@ class _PriceList  extends State<PriceList>{
        );
      }
        void _onFocusChange() {
-         if(!isAdShown){
+         if(!Ads().isPriceAdShown){
            interstitialAd..load()..show();
-           isAdShown=true;
+           Ads().isPriceAdShown=true;
          }
          
          setState(() {
