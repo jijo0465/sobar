@@ -55,9 +55,12 @@ class SqliteDb{
         if(holidaysRecord.isNotEmpty){
           List<Holidays> holidayList=List();
           List<DateTime> holidates =List();
-          DateTime today=DateTime.now();
+          DateTime now=DateTime.now();
+          DateTime today = DateTime(now.year, now.month, now.day);
+
           for(int i=0;i<holidaysRecord.length;i++){
-            if(today.isBefore(DateTime.parse(holidaysRecord[i]['date']+" 00:00:00"))){
+            DateTime checkDate=DateTime.parse(holidaysRecord[i]['date']);
+            if(now.isBefore(DateTime.parse(holidaysRecord[i]['date']+" 00:00:00"))||checkDate==today){
               Holidays holidays = Holidays(holidaysRecord[i]['id'].toString(), DateTime.parse(holidaysRecord[i]['date']+" 00:00:00"),
                holidaysRecord[i]['reason']);
               holidayList.add(holidays);

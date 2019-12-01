@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:kudians/bottom_sheet_text.dart';
 import 'package:kudians/bottom_sheet_title.dart';
 import 'package:kudians/rating.dart';
+import 'package:kudians/sobar_divider.dart';
 
 class BottomSheetHeader extends StatelessWidget{
   final String title;
@@ -18,7 +19,7 @@ class BottomSheetHeader extends StatelessWidget{
     return Container(
       // margin: EdgeInsets.fromLTRB(12, 12, 0, 12),
       padding: EdgeInsets.fromLTRB(12, 0, 0, 8),
-      color: Colors.deepOrange[100].withOpacity(0.6),
+      color: Colors.white,
       child: AnimatedCrossFade(
           firstChild: Container(
             child: Column(

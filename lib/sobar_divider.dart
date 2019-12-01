@@ -7,7 +7,7 @@ class SobarDivider extends StatelessWidget{
       padding: EdgeInsets.fromLTRB(8, 0, 8, 0),
       child: Divider(
         color: Colors.grey[700],
-        height: 0,
+        height: 2,
       ),
     );
   }

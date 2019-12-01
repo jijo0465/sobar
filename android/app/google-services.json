@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "878841852216-qqche8a9upk1g1in6dmntkjq3sue14ff.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.siphlo.sobar",
+            "certificate_hash": "39b0d9f02b4317288d435be7cb89fcad725ac098"
+          }
+        },
+        {
           "client_id": "878841852216-e5u3tuqupifqbjdi5486g3kr7qchjfr6.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

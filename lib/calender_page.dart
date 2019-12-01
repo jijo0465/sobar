@@ -89,7 +89,7 @@ class CalendarPage extends StatefulWidget{
                 ),
                 Calendar(_holidays),
                 SizedBox(
-                  height: 120,
+                  height: MediaQuery.of(context).size.height*0.19,
                   child: SobarHolidayList(holidays: holidays,numOfHolidays: _numOfHolidays,),
                 ),
                 SizedBox(

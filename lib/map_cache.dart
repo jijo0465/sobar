@@ -6,6 +6,7 @@ class MapCache {
   List<PlaceData> _allBevco;
   BitmapDescriptor _toddyIcon;
   BitmapDescriptor _bevcoIcon;
+  BitmapDescriptor _userLocationIcon;
   static final MapCache _singleton = MapCache._internal();
   factory MapCache() {
     return _singleton;
@@ -34,17 +35,21 @@ class MapCache {
   bool isAllBevcoCached(){
     return this._allBevco.isNotEmpty;
   }
-  void setIcons(BitmapDescriptor toddyIcon,BitmapDescriptor bevcoIcon){
+  void setIcons(BitmapDescriptor toddyIcon,BitmapDescriptor bevcoIcon,BitmapDescriptor userIcon){
     this._toddyIcon=toddyIcon;
     this._bevcoIcon=bevcoIcon;
+    this._userLocationIcon=userIcon;
   }
   bool isIconsCached(){
-    return (!(this._bevcoIcon==null)||!(this._toddyIcon==null));
+    return (!(this._bevcoIcon==null)||!(this._toddyIcon==null)||!(this._userLocationIcon==null));
   }
   BitmapDescriptor getBevcoIcon(){
     return this._bevcoIcon;
   }
   BitmapDescriptor getToddyIcon(){
     return this._toddyIcon;
+  }
+    BitmapDescriptor getUserLocationIcon(){
+    return this._userLocationIcon;
   }
 }

@@ -74,8 +74,9 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
               elevation: 0,
               backgroundColor: Colors.transparent,
               bottomOpacity: 0.0,
-              iconTheme: IconThemeData(color: Colors.white),
-              title: Text('Sobar Sign Up',style: TextStyle(
+              iconTheme: IconThemeData(color: Colors.white
+              ),
+              title: Text('Sobar Signin',style: TextStyle(
                 color: Colors.white
               ),),
               
@@ -305,6 +306,7 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
                               data: Theme.of(context)
                                             .copyWith(primaryColor: Colors.deepOrange,),
                                 child: TextFormField(
+                                  textInputAction: TextInputAction.done,
                                   controller: _sobarNameController,
                                   textAlign: TextAlign.left,
                                   style: TextStyle(
@@ -344,7 +346,7 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
                                 )
                               ),
                               cursorColor: Colors.deepOrange,
-                              keyboardType: TextInputType.phone,
+                              keyboardType: TextInputType.text,
                               maxLengthEnforced: false,
                               validator: (value){
                                   String patttern = r'(^[A-Za-z]\w*$)';
@@ -481,10 +483,7 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
     final FirebaseUser currentUser = await _auth.currentUser();
     assert(firebaseUser.uid == currentUser.uid);
       if (firebaseUser != null) {
-        sobarUser=await FirebaseServices().getSobarUser(firebaseUser.uid);
-        setState(() {
-          isLogged=true;
-        });
+        sobarUser=await FirebaseServices().getSobarUser(firebaseUser.uid);  
         if(sobarUser!=null){
           isPreviouslyLogged=true;
           _sobarNameController.text=sobarUser.sobarName;
@@ -492,15 +491,18 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
           isPreviouslyLogged=false;
           sobarUser=SobarUsers(firebaseUser.uid);
           sobarUser.phoneNumber=firebaseUser.phoneNumber;
-          
         }
         sobarUser.signInMethod='phone';
+        setState(() {
+          isLogged=true;
+        });
         // setUser(user.uid);
         // _message = 'Successfully signed in, uid: ' + user.uid;
         // Navigator.pop(context,user.uid);
       } else {
         
         _message = 'Sign in failed';
+        showErrorDialog();
       }
 
     }catch (e){
@@ -525,7 +527,7 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
         context: context,
         builder: (BuildContext context){
           return AlertDialog(
-            content: Text('Somethings not right. Please try again'),
+            content: Text('Somethings not right. Please try different signin method'),
             title: Text('Failed'),
             actions: <Widget>[FlatButton(child: Text('Ok'),onPressed: (){
               Navigator.of(context).pop();

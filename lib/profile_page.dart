@@ -11,6 +11,8 @@ import 'package:kudians/user_cache.dart';
 import 'package:kudians/users.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:kudians/google_auth.dart';
+import 'package:share/share.dart';
+import 'package:launch_review/launch_review.dart'; 
 // import 'package:google_sign_in/google_sign_in.dart';
 // import "package:http/http.dart" as http;
 
@@ -172,25 +174,9 @@ class _ProfilePage extends State<ProfilePage>{
                       )),
                       isLogged?
                       Padding(
-                        padding: EdgeInsets.only(left: 12,right: 12),
+                        padding: EdgeInsets.only(left: 20,right: 20),
                         child: Column(
                           children: <Widget>[
-                          //   SobarFormField(
-                          //   label: 'First Name',
-                          //   maxLines: 1, enabled: true,
-                          //   initialValue: sobarUser.firstName,
-                          //   onChanged: (value){
-                          //     firstName=value;
-                          //   },
-                          // ),
-                          // SobarFormField(
-                          //   label: 'Last Name',
-                          //   initialValue: sobarUser.lastName,
-                          //   maxLines: 1, enabled: true,
-                          //   onChanged: (value){
-                          //     lastName=value;
-                          //   },
-                          // ),
                           SobarFormField(
                             label: 'Sobar Name',
                             initialValue: sobarUser.sobarName,
@@ -217,7 +203,39 @@ class _ProfilePage extends State<ProfilePage>{
                             label: 'Email',
                             initialValue: sobarUser.email,
                             maxLines: 1, enabled: false,
-                            )
+                            ),
+                            SizedBox(
+                              height: 50,
+                            ),
+                            Container(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      RaisedButton(
+                        elevation: 3,
+                        hoverElevation: 10,
+                        hoverColor: Colors.black,
+                        disabledElevation: 0,
+                        onPressed: updateProfile,
+                        color: Colors.black,
+                        child: Text("Update",style: TextStyle(color:Colors.white,letterSpacing: 0.2)),
+                      ),FlatButton(
+                          child: Text("Logout",style: TextStyle(
+                            letterSpacing: 0.2,
+                            color: Colors.deepOrange.withOpacity(0.8)
+                          ),),
+                          onPressed: ()async {
+                            await FirebaseAuth.instance.signOut();
+                            // _handleSignOut();
+                            setState(() {
+                              isLogged=false; 
+                            });
+                            UserCache().clearUserCache();
+                          },
+                        )
+                          ],
+                        ),
+                )
                           ],
                         ),
                       ):Column(
@@ -257,37 +275,37 @@ class _ProfilePage extends State<ProfilePage>{
                         ),
                       ),
                     ),
+               
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
                     Container(
-                  alignment: Alignment.bottomCenter,
-                  child: isLogged?Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      RaisedButton(
-                        elevation: 3,
-                        hoverElevation: 10,
-                        hoverColor: Colors.black,
-                        disabledElevation: 0,
-                        onPressed: updateProfile,
-                        color: Colors.black,
-                        child: Text("Update",style: TextStyle(color:Colors.white,letterSpacing: 0.2)),
-                      ),FlatButton(
-                          child: Text("Logout",style: TextStyle(
-                            letterSpacing: 0.2,
-                            color: Colors.deepOrange.withOpacity(0.8)
-                          ),),
-                          onPressed: ()async {
-                            await FirebaseAuth.instance.signOut();
-                            // _handleSignOut();
-                            setState(() {
-                              isLogged=false; 
-                            });
-                            UserCache().clearUserCache();
-                          },
-                        )
+                      child: FlatButton(
+                        child: Row(
+                          children: <Widget>[
+                            Icon(Icons.share,color: Colors.white.withOpacity(0.7),),
+                            Text('   Share Sobar',style: TextStyle(color: Colors.white.withOpacity(0.7)),),
                           ],
-                        ):Container(),
+                        ), onPressed: () {
+                          Share.share('https://play.google.com/store/apps/details?id=com.siphlo.sobar', subject: 'Checkout Sobar App');
+                        },
+                      ),
+                    ),
+                    Container(
+                      child: FlatButton(
+                        child: Row(
+                          children: <Widget>[
+                            Icon(Icons.rate_review,color: Colors.white.withOpacity(0.7),),
+                            Text('   Rate & Review',style: TextStyle(color: Colors.white.withOpacity(0.7)),),
+                          ],
+                        ), onPressed: () {
+                          LaunchReview.launch();
+                        },
+                      ),
+                    )
+                  ],
                 ),
-                isLogged?Container(
+                Container(
                   // alignment: Alignment.topCenter,
                   child: FlatButton(
                     child: Text('Read our privacy policy',style: TextStyle(color: Colors.white24),),
@@ -295,7 +313,7 @@ class _ProfilePage extends State<ProfilePage>{
                       _showPrivacyDialog();
                                           },
                                         ),
-                                      ):Container()
+                                      )
                                   ],
                                 );
                                }

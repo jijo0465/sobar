@@ -49,6 +49,7 @@ class _BarMap extends State<BarMap>{
   List<PlaceData> allToddy;
   BitmapDescriptor toddyIcon;
   BitmapDescriptor barIcon;
+  BitmapDescriptor userIcon;
   bool isMarkerTapped;
   GoogleMapsPlaces places;
   PlaceDetails placeDetails;
@@ -64,11 +65,11 @@ class _BarMap extends State<BarMap>{
   PermissionStatus _status;
   Map<String,dynamic> userReview;
   bool isUserReviewed=false;
+  bool gotCenter=false;
   @override
   void initState() {
     _geolocator=Geolocator();
-    checkPermission();
-    // setUserLocation();
+        checkPermission();
         super.initState();
         filterChoice="bevco";
         rootBundle.loadString('assets/map_style.json').then((string) {
@@ -78,28 +79,9 @@ class _BarMap extends State<BarMap>{
         allBevco=List<PlaceData>();
         isMarkerTapped=false;
         allPlaces=List<PlaceData>();
-        if(MapCache().isIconsCached()){
-          barIcon=MapCache().getBevcoIcon();
-          toddyIcon=MapCache().getToddyIcon();
-        }else{
-          BitmapDescriptor.fromAssetImage(
-            ImageConfiguration(size: Size.fromHeight(20)), 'assets/bevco_marker.png')
-            .then((onValue) {
-              setState(() {
-                barIcon = onValue;
-              });
-              
-              BitmapDescriptor.fromAssetImage(
-                ImageConfiguration(size: Size(15, 15)), 'assets/toddy_marker.png')
-                .then((value) {
-                  setState(() {
-                    toddyIcon = value;
-                  });
-                  
-                  MapCache().setIcons(toddyIcon, barIcon);
-            });
-        });
-        }
+        barIcon=MapCache().getBevcoIcon();
+        toddyIcon=MapCache().getToddyIcon();
+        userIcon=MapCache().getUserLocationIcon();
         
         allBars=List<Bars>();
         firebaseServices=FirebaseServices();
@@ -148,6 +130,9 @@ class _BarMap extends State<BarMap>{
           for(PlaceData bevco in allBevco){
             Marker marker=getMarker(bevco);
               markers.add(marker);
+              if(gotCenter){
+                markers.add(getUserIconMarker(_center));
+              }
             }
           }
         }else if(filterChoice=="toddy"){
@@ -158,6 +143,9 @@ class _BarMap extends State<BarMap>{
             Marker marker=getMarker(toddy);
               markers.add(marker);
             }
+            if(gotCenter){
+                markers.add(getUserIconMarker(_center));
+              }
           }
         }
         
@@ -169,50 +157,17 @@ class _BarMap extends State<BarMap>{
             height: MediaQuery.of(context).size.height,
             width: MediaQuery.of(context).size.width,
             child:GoogleMap(
-              myLocationEnabled: true,
+              myLocationEnabled: false,
               myLocationButtonEnabled: false,
               tiltGesturesEnabled: true,
               mapToolbarEnabled: false,
               mapType: MapType.normal,
-              markers: markers,
+              markers:  markers,
               onMapCreated: _onMapCreated,
               initialCameraPosition: CameraPosition(
                   target: _center,
                   zoom: 8.0,
                 ))),
-                //   Positioned(
-                //   bottom: 0.145*MediaQuery.of(context).size.height,
-                //   child: Container(
-                //     decoration: BoxDecoration(
-                //       borderRadius: BorderRadius.circular(6),
-                //       color: Colors.deepOrange[200].withOpacity(0.1),
-                //     ),
-                //     alignment: Alignment.center,
-                //     width: 0.72*MediaQuery.of(context).size.width,
-                //     height: 30,
-                //     child: ClipRRect(
-                //       clipBehavior: Clip.antiAlias,
-                //       borderRadius: BorderRadius.all(Radius.circular(6)),
-                //         child: BackdropFilter (
-                //         filter: ImageFilter.blur(sigmaX: 7.0, sigmaY: 7.0),
-                //           child: Marquee(
-                //           text: 'Alcohol Consumption is injurious to health',
-                //           style: TextStyle(fontWeight: FontWeight.bold,color: Colors.red[700]),
-                //           scrollAxis: Axis.horizontal,
-                //           crossAxisAlignment: CrossAxisAlignment.center,
-                //           blankSpace: 40.0,
-                //           velocity: 100.0,
-                //           pauseAfterRound: Duration(seconds: 1),
-                //           startPadding: 20.0,
-                //           accelerationDuration: Duration(seconds: 1),
-                //           accelerationCurve: Curves.linear,
-                //           decelerationDuration: Duration(milliseconds: 500),
-                //           decelerationCurve: Curves.easeOut,
-                //         ),
-                //       ),
-                //     )
-                //   ),
-                // ),
                 Positioned(
                   top: MediaQuery.of(context).size.height*0.082,
                   child: Container(
@@ -280,7 +235,6 @@ class _BarMap extends State<BarMap>{
                     ),
                   ),
                 )
-    
             
           ]),
         );
@@ -387,13 +341,16 @@ class _BarMap extends State<BarMap>{
                   child: Column(
                     children: <Widget>[
                       BottomSheetHeader(title: place.placeName,rating: place.placeRating,totalRated: place.placeTotalRating,type: type,bottState: stop,),
+                      Divider(
+                      height: 2,
+                      color: Colors.grey[900],
+                    ),
                       Expanded(
                         child: CustomScrollView(
                         slivers: <Widget>[
                           SliverList(
                             delegate: SliverChildListDelegate(
                               [
-                                SobarDivider(),
                                 BottomSheetAddressPhone(address: address,phone: phone, latLng: latLng, placeId: placePlaceId, name:place.placeName),
                                 SobarDivider(),
                                 url.length!=0?
@@ -448,7 +405,11 @@ class _BarMap extends State<BarMap>{
         await _geolocator.checkGeolocationPermissionStatus().then((status) async {
           if(status==GeolocationStatus.granted){
             position = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+            
              _center=LatLng(position.latitude, position.longitude);
+             setState(() {
+              gotCenter=true;
+            });
             mapController.animateCamera(CameraUpdate.newCameraPosition(
               CameraPosition(
                   target: _center, zoom: 13)));
@@ -456,6 +417,7 @@ class _BarMap extends State<BarMap>{
         });
         // position = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
         // geolocationStatus
+        // setUserIconMarker(_center);
       }
     
       void checkPermission() async{
@@ -470,5 +432,14 @@ class _BarMap extends State<BarMap>{
           });
         }
         setUserLocation();
+      }
+      Marker getUserIconMarker(LatLng position){
+        BitmapDescriptor icon=userIcon;
+        Marker marker= Marker(
+          icon: icon,
+          position: position,
+          markerId: MarkerId('user_location'),
+        );
+        return marker;
       }
 }
